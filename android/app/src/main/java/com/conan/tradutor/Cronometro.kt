@@ -6,6 +6,7 @@ class Cronometro(private val totalMs: Long) {
     var restanteMs = totalMs
         private set
     private var ativo = false      // ja foi iniciado
+    val iniciado get() = ativo
     private var pausado = false
     private var ultimo = 0L
 
@@ -17,6 +18,13 @@ class Cronometro(private val totalMs: Long) {
         restanteMs = totalMs
         ativo = true
         ultimo = agora
+    }
+
+    // volta ao estado parado (carregando): nao desconta ate o proximo iniciar.
+    // o dedo encostado (pausado) continua valendo
+    fun parar() {
+        restanteMs = totalMs
+        ativo = false
     }
 
     fun pausar(agora: Long) {

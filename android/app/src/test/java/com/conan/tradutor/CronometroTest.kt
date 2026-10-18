@@ -61,4 +61,26 @@ class CronometroTest {
         c.descontar(20_000)
         assertEquals(0f, c.fracao, 0f)
     }
+
+    @Test fun pararVoltaAoEstadoParadoDoCarregamento() {
+        val c = Cronometro(15_000)
+        assertFalse(c.iniciado)
+        c.iniciar(0)
+        c.descontar(5_000)
+        assertTrue(c.iniciado)
+        c.parar()
+        assertFalse(c.iniciado)
+        assertEquals(15_000L, c.descontar(99_000))
+        assertFalse(c.acabou)
+    }
+
+    @Test fun resultadoComDedoEncostadoDepoisDeCarregarSoCorreAoSoltar() {
+        val c = Cronometro(15_000)
+        c.parar()                 // carregando
+        c.pausar(1_000)           // dedo encosta durante o carregamento
+        c.iniciar(8_000)          // resultado chega
+        assertEquals(15_000L, c.descontar(30_000))
+        c.retomar(30_000)
+        assertEquals(13_000L, c.descontar(32_000))
+    }
 }
