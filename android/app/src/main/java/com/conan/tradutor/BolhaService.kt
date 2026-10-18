@@ -13,6 +13,7 @@ import android.graphics.drawable.GradientDrawable
 import android.provider.Settings
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
@@ -116,7 +117,10 @@ class BolhaService : Service() {
         bolha = v
     }
 
+    private val toques = Toques(500)
+
     private fun traduzirCopiado() {
+        if (!toques.aceitar(SystemClock.uptimeMillis())) return  // toque repetido: um popup so
         startActivity(Intent(this, ClipboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
