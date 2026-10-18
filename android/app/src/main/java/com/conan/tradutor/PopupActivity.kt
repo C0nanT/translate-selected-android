@@ -44,8 +44,7 @@ abstract class PopupActivity : Activity() {
     private lateinit var barra: BarraTempo
     private val painel = GradientDrawable()
     private val handler = Handler(Looper.getMainLooper())
-    private var restanteMs = HIDE_MS
-    private var ultimoTick = 0L
+    private val cronometro = Cronometro(HIDE_MS)
     private var pausado = false
 
     // arrasto: so arma depois de segurar parado (arrastar direto rola o texto)
@@ -67,17 +66,11 @@ abstract class PopupActivity : Activity() {
     // so roda com o tempo correndo; pausa tira o tick da fila
     private val tick = object : Runnable {
         override fun run() {
-            descontar()
-            if (restanteMs <= 0) { finish(); return }
-            barra.fracao = restanteMs.toFloat() / HIDE_MS
+            cronometro.descontar(SystemClock.uptimeMillis())
+            if (cronometro.acabou) { finish(); return }
+            barra.fracao = cronometro.fracao
             handler.postDelayed(this, TICK_MS)
         }
-    }
-
-    private fun descontar() {
-        val agora = SystemClock.uptimeMillis()
-        restanteMs -= agora - ultimoTick
-        ultimoTick = agora
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -179,8 +172,7 @@ abstract class PopupActivity : Activity() {
     }
 
     private fun reiniciarTempo() {
-        restanteMs = HIDE_MS
-        ultimoTick = SystemClock.uptimeMillis()
+        cronometro.iniciar(SystemClock.uptimeMillis())
         barra.fracao = 1f
         handler.removeCallbacks(tick)
         if (!pausado) handler.postDelayed(tick, TICK_MS)
@@ -193,7 +185,7 @@ abstract class PopupActivity : Activity() {
             MotionEvent.ACTION_DOWN -> {
                 if (!pausado) {
                     pausado = true
-                    descontar()
+                    cronometro.pausar(SystemClock.uptimeMillis())
                     handler.removeCallbacks(tick)
                 }
                 dedoX = ev.rawX; dedoY = ev.rawY
@@ -213,7 +205,7 @@ abstract class PopupActivity : Activity() {
                 handler.removeCallbacks(armarArrasto)
                 if (pausado) {
                     pausado = false
-                    ultimoTick = SystemClock.uptimeMillis()
+                    cronometro.retomar(SystemClock.uptimeMillis())
                     handler.postDelayed(tick, TICK_MS)
                 }
                 if (arrastando) {
