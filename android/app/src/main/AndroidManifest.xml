@@ -13,7 +13,8 @@
         android:label="Tradutor"
         android:supportsRtl="true">
 
-        <!-- item "Traduzir pt-BR" no menu da selecao de texto -->
+        <!-- item "Traduzir pt-BR" no menu da selecao de texto. o rotulo e fixo aqui:
+             se mudar IDIOMA_DESTINO (Config.kt), trocar tambem o android:label -->
         <activity
             android:name=".ProcessTextActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"

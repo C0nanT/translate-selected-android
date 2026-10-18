@@ -70,7 +70,7 @@ class BolhaService : Service() {
             gravity = Gravity.CENTER
             setTextColor(Color.WHITE)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-            background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.rgb(0x1A, 0x73, 0xE8)) }
+            background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(corDestaque()) }
             alpha = 0.85f
         }
         // arrastar move; toque curto sem mexer traduz
@@ -100,8 +100,6 @@ class BolhaService : Service() {
         bolha = null
         super.onDestroy()
     }
-
-    private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
 
     companion object {
         const val ACAO_DESLIGAR = "com.conan.tradutor.DESLIGAR"
