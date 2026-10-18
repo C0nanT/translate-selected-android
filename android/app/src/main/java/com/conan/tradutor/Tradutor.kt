@@ -61,7 +61,7 @@ private fun motivoDe(e: Exception): String = when (e) {
 }
 
 fun urlTraducao(texto: String): String =
-    "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=" +
+    "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=$IDIOMA_DESTINO&dt=t&q=" +
         URLEncoder.encode(texto, "UTF-8")
 
 // data[0] = partes; concatena o primeiro elemento de cada uma, ignorando vazias

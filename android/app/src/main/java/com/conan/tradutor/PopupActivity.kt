@@ -225,13 +225,9 @@ abstract class PopupActivity : Activity() {
         super.onDestroy()
     }
 
-    private fun noturno() =
-        resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
     private fun corTexto() = if (noturno()) Color.rgb(0xE6, 0xE6, 0xE6) else Color.rgb(0x20, 0x20, 0x20)
     private fun corFundo() = if (noturno()) Color.rgb(0x2D, 0x2D, 0x2D) else Color.WHITE
     private fun corErro() = if (noturno()) Color.rgb(0x8C, 0x1D, 0x18) else Color.rgb(0xB3, 0x26, 0x1E)
-    private fun corDestaque() = if (noturno()) Color.rgb(0x8A, 0xB4, 0xF8) else Color.rgb(0x1A, 0x73, 0xE8)
-    private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
 
     // barra fina que encolhe da esquerda p/ direita (ancorada a direita)
     private class BarraTempo(ctx: Activity, cor: Int) : View(ctx) {
