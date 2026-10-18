@@ -12,6 +12,8 @@ import java.net.URLEncoder
 sealed class Resultado {
     data class Traducao(val texto: String) : Resultado()
     data class GrandeDemais(val n: Int) : Resultado()
+    object Vazio : Resultado()
+    object SemLetras : Resultado()
     data class Erro(val motivo: String) : Resultado()
 }
 
@@ -35,6 +37,8 @@ fun juntarLinhas(texto: String): String =
 
 fun traduzir(bruto: String, buscar: (String) -> String): Resultado {
     val texto = juntarLinhas(bruto)
+    if (texto.isBlank()) return Resultado.Vazio
+    if (texto.none { it.isLetter() }) return Resultado.SemLetras
     if (texto.length > MAX_CHARS) return Resultado.GrandeDemais(texto.length)
     val corpo = try {
         buscar(urlTraducao(texto))
