@@ -69,7 +69,19 @@ abstract class PopupActivity : Activity() {
         window.setLayout(minOf(desejada, tela - dp(16)), ViewGroup.LayoutParams.WRAP_CONTENT)
         window.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
 
-        mostrar(texto)
+        mostrar("Traduzindo…")
+        // rede fora da thread principal; resultado apos fechar o popup e descartado
+        Thread {
+            val r = traduzir(texto, ::buscarHttp)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                when (r) {
+                    is Resultado.Traducao -> mostrar(r.texto)
+                    is Resultado.GrandeDemais -> mostrar("Texto grande demais (${r.n} caracteres)", erro = true)
+                    is Resultado.Erro -> mostrar(r.motivo, erro = true)
+                }
+            }
+        }.start()
     }
 
     // define o conteudo e reinicia o tempo. erro = vermelho legivel nos dois temas.
