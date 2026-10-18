@@ -30,6 +30,13 @@ import kotlin.math.abs
 // segurar e arrastar move; o proximo abre no mesmo lugar (salvo em prefs).
 // erro: fundo vermelho com o motivo (igual ao Linux).
 // cada entrada (selecao, compartilhar...) so diz de onde vem o texto.
+//
+// Toda entrada declarada no AndroidManifest precisa de:
+//  - android:theme="@style/Popup" (janela translucida, toque fora fecha)
+//  - android:configChanges com orientation|screenSize|smallestScreenSize|screenLayout|
+//    keyboard|keyboardHidden|navigation e uiMode: girar ou trocar claro/escuro nao
+//    recria a tela (senao refaz a traducao e reinicia o tempo)
+//  - android:excludeFromRecents="true"
 abstract class PopupActivity : Activity() {
 
     protected abstract fun textoDe(intent: Intent): String?
@@ -46,6 +53,7 @@ abstract class PopupActivity : Activity() {
     private val handler = Handler(Looper.getMainLooper())
     private val cronometro = Cronometro(HIDE_MS)
     private var pausado = false
+    private var emErro = false
 
     // arrasto: so arma depois de segurar parado (arrastar direto rola o texto)
     private var arrastando = false
@@ -142,9 +150,10 @@ abstract class PopupActivity : Activity() {
         window.setLayout(minOf(desejada, tela), ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
-    // configChanges no manifest: girar/redimensionar nao recria nem refaz o pedido
+    // configChanges no manifest: girar/redimensionar/trocar tema nao recria nem refaz o pedido
     override fun onConfigurationChanged(novo: Configuration) {
         super.onConfigurationChanged(novo)
+        pintar()
         ajustarLargura()
         val lp = window.attributes
         moverPara(lp.x, lp.y)  // tela mudou -> limites mudaram
@@ -165,9 +174,8 @@ abstract class PopupActivity : Activity() {
     // "Traduzindo…": o tempo fica parado e a barra vazia ate o resultado ou erro
     private fun carregando() {
         label.text = "Traduzindo…"
-        painel.setColor(corFundo())
-        label.setTextColor(corTexto())
-        barra.cor = corDestaque()
+        emErro = false
+        pintar()
         cronometro.parar()
         handler.removeCallbacks(tick)
         barra.fracao = 0f
@@ -176,10 +184,16 @@ abstract class PopupActivity : Activity() {
     // define o conteudo e reinicia o tempo. erro = fundo vermelho, texto branco (nos dois temas).
     fun mostrar(texto: String, erro: Boolean = false) {
         label.text = texto
-        painel.setColor(if (erro) corErro() else corFundo())
-        label.setTextColor(if (erro) Color.WHITE else corTexto())
-        barra.cor = if (erro) Color.WHITE else corDestaque()
+        emErro = erro
+        pintar()
         reiniciarTempo()
+    }
+
+    // cores do estado atual (normal ou erro) no tema atual; nao mexe no texto nem no tempo
+    private fun pintar() {
+        painel.setColor(if (emErro) corErro() else corFundo())
+        label.setTextColor(if (emErro) Color.WHITE else corTexto())
+        barra.cor = if (emErro) Color.WHITE else corDestaque()
     }
 
     private fun reiniciarTempo() {
