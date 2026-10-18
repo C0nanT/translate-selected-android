@@ -36,6 +36,8 @@ abstract class PopupActivity : Activity() {
 
     // entrada que so consegue ler o texto com a janela em foco (area de transferencia)
     protected open val lerComFoco = false
+    // entrada que mostra aviso vermelho quando nao ha o que traduzir (bolha); as outras fecham caladas
+    protected open val avisaVazio = false
     private var iniciado = false
 
     private lateinit var label: TextView
@@ -115,7 +117,7 @@ abstract class PopupActivity : Activity() {
     private fun iniciar(bruto: String?) {
         iniciado = true
         val texto = bruto?.trim().orEmpty()
-        if (texto.isEmpty()) { finish(); return }
+        if (texto.isEmpty()) { semTexto("Nada copiado"); return }
         // rede fora da thread principal. a thread so guarda referencia fraca:
         // popup fechado nao fica preso na memoria e o resultado e descartado.
         val ref = WeakReference(this)
@@ -125,11 +127,17 @@ abstract class PopupActivity : Activity() {
         }.start()
     }
 
+    private fun semTexto(aviso: String) {
+        if (avisaVazio) mostrar(aviso, erro = true) else finish()
+    }
+
     private fun aplicar(r: Resultado) {
         if (isFinishing || isDestroyed) return
         when (r) {
             is Resultado.Traducao -> mostrar(r.texto)
             is Resultado.GrandeDemais -> mostrar("Texto grande demais (${r.n} caracteres)", erro = true)
+            Resultado.Vazio -> semTexto("Nada copiado")
+            Resultado.SemLetras -> semTexto("Nada para traduzir")
             is Resultado.Erro -> mostrar(r.motivo, erro = true)
         }
     }
