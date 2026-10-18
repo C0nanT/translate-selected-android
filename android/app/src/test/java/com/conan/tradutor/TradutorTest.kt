@@ -33,6 +33,27 @@ class TradutorTest {
         assertEquals(Resultado.Traducao("a\"b\né\\"), r)
     }
 
+    @Test fun textoVazioNaoChamaRede() {
+        var chamou = false
+        assertEquals(Resultado.Vazio, traduzir("") { chamou = true; "" })
+        assertEquals(Resultado.Vazio, traduzir("  \n \r\n\t ") { chamou = true; "" })
+        assertFalse(chamou)
+    }
+
+    @Test fun semLetrasNaoChamaRede() {
+        var chamou = false
+        for (t in listOf("42", "—", "3,14 % + 7", "content://media/external/1"
+            .filter { !it.isLetter() })) {
+            assertEquals(Resultado.SemLetras, traduzir(t) { chamou = true; "" })
+        }
+        assertFalse(chamou)
+    }
+
+    @Test fun umaLetraBasta() {
+        val r = traduzir("42 a") { resp("\"ok\",\"a\"") }
+        assertEquals(Resultado.Traducao("ok"), r)
+    }
+
     @Test fun acimaDoLimiteNaoChamaRede() {
         var chamou = false
         val r = traduzir("a".repeat(MAX_CHARS + 1)) { chamou = true; "" }
