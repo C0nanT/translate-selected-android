@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
+import android.provider.Settings
 import android.os.Build
 import android.os.IBinder
 import android.util.TypedValue
@@ -31,6 +32,8 @@ class BolhaService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACAO_DESLIGAR) { stopSelf(); return START_NOT_STICKY }
+        // sem "Sobrepor a outros apps" a janela não pode ser adicionada: para em silêncio, sem erro nem pedido de reinício
+        if (!Settings.canDrawOverlays(this)) { stopSelf(); return START_NOT_STICKY }
         emPrimeiroPlano()
         if (bolha == null) mostrarBolha()
         return START_STICKY
