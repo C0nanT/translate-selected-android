@@ -33,8 +33,13 @@ class BolhaService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACAO_DESLIGAR) { stopSelf(); return START_NOT_STICKY }
         // sem "Sobrepor a outros apps" a janela não pode ser adicionada: para em silêncio, sem erro nem pedido de reinício
-        if (!Settings.canDrawOverlays(this)) { stopSelf(); return START_NOT_STICKY }
-        emPrimeiroPlano()
+        emPrimeiroPlano() // startForegroundService exige startForeground antes de parar, senão ForegroundServiceDidNotStartInTimeException
+        if (!Settings.canDrawOverlays(this)) {
+            if (Build.VERSION.SDK_INT >= 24) stopForeground(STOP_FOREGROUND_REMOVE)
+            else @Suppress("DEPRECATION") stopForeground(true)
+            stopSelf()
+            return START_NOT_STICKY
+        }
         if (bolha == null) mostrarBolha()
         return START_STICKY
     }
