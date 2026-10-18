@@ -11,6 +11,7 @@
         <!-- item "Traduzir pt-BR" no menu da selecao de texto -->
         <activity
             android:name=".ProcessTextActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"
             android:excludeFromRecents="true"
             android:exported="true"
             android:label="Traduzir pt-BR"
