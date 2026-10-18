@@ -75,9 +75,7 @@ class BolhaService : Service() {
             gravity = Gravity.TOP or Gravity.START
             val tela = resources.displayMetrics
             val salva = getSharedPreferences(PREFS, MODE_PRIVATE)
-            val p = ajustarPosicao(
-                Pos(salva.getInt("x", tela.widthPixels - lado), salva.getInt("y", tela.heightPixels / 3)),
-                Tamanho(tela.widthPixels, tela.heightPixels), Tamanho(lado, lado), centradaX = false)
+            val p = naTela(salva.getInt("x", tela.widthPixels - lado), salva.getInt("y", tela.heightPixels / 3), lado)
             x = p.x
             y = p.y
         }
@@ -109,9 +107,7 @@ class BolhaService : Service() {
                         v.removeCallbacks(desligarSegurando)
                     }
                     if (arrastou) {
-                        val tela = resources.displayMetrics
-                        val p = ajustarPosicao(Pos(x0 + dx.toInt(), y0 + dy.toInt()),
-                            Tamanho(tela.widthPixels, tela.heightPixels), Tamanho(lado, lado), centradaX = false)
+                        val p = naTela(x0 + dx.toInt(), y0 + dy.toInt(), lado)
                         lp.x = p.x; lp.y = p.y
                         wm.updateViewLayout(v, lp)
                     }
@@ -130,7 +126,13 @@ class BolhaService : Service() {
         bolha = v
     }
 
-    private val toques = Toques(500)
+    // posicao da bolha (lado x lado) sem sair da tela
+    private fun naTela(x: Int, y: Int, lado: Int): Pos {
+        val tela = resources.displayMetrics
+        return ajustarPosicao(Pos(x, y), Tamanho(tela.widthPixels, tela.heightPixels), Tamanho(lado, lado), centradaX = false)
+    }
+
+    private val toques = Toques(TOQUE_REPETIDO_MS)
 
     private fun traduzirCopiado() {
         if (!toques.aceitar(SystemClock.uptimeMillis())) return  // toque repetido: um popup so

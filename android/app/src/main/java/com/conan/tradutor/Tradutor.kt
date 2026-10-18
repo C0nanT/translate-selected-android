@@ -42,7 +42,7 @@ fun traduzir(bruto: String, buscar: (String) -> String): Resultado {
     val n = texto.codePointCount(0, texto.length)  // emoji conta 1, como len() no PC
     if (n > MAX_CHARS) return Resultado.GrandeDemais(n)
     val url = urlTraducao(texto)
-    if (url.length > MAX_URL) return Resultado.GrandeDemais(n)
+    if (url.length > MAX_URL) return Resultado.GrandeDemais(n)  // n aqui e <= MAX_CHARS: a mensagem mostra a contagem de caracteres, nao o tamanho da URL
     val corpo = try {
         buscar(url)
     } catch (e: Exception) {

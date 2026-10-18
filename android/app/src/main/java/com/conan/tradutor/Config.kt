@@ -9,3 +9,4 @@ const val MAX_URL = 8000
 const val POPUP_CHARS = 80       // largura maxima do popup, em caracteres
 // idioma de destino (tl= na URL). o rotulo "Traduzir pt-BR" no manifest precisa acompanhar
 const val IDIOMA_DESTINO = "pt"
+const val TOQUE_REPETIDO_MS = 500L  // toques na bolha mais proximos que isto sao ignorados
