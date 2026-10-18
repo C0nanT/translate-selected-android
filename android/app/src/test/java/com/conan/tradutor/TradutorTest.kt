@@ -61,6 +61,21 @@ class TradutorTest {
         assertFalse(chamou)
     }
 
+    @Test fun emojiContaUmCaracterePorCodePoint() {
+        var chamou = false
+        val r = traduzir("a" + "😀".repeat(MAX_CHARS)) { chamou = true; "" }
+        assertEquals(Resultado.GrandeDemais(MAX_CHARS + 1), r)
+        assertFalse(chamou)
+    }
+
+    @Test fun urlCodificadaGrandeDemaisNaoChamaRede() {
+        var chamou = false
+        // 3000 caracteres (dentro de MAX_CHARS), mas cada "é" vira 6 na URL
+        val r = traduzir("é".repeat(MAX_CHARS)) { chamou = true; "" }
+        assertEquals(Resultado.GrandeDemais(MAX_CHARS), r)
+        assertFalse(chamou)
+    }
+
     @Test fun noLimiteTraduz() {
         val r = traduzir("a".repeat(MAX_CHARS)) { resp("\"ok\",\"a\"") }
         assertEquals(Resultado.Traducao("ok"), r)
