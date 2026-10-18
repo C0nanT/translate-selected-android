@@ -105,6 +105,13 @@ abstract class PopupActivity : Activity() {
         val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
         moverPara(prefs.getInt("x", 0), prefs.getInt("y", 0))
         ajustarLargura()
+        // tamanho real so existe depois do layout: reajusta a posicao salva a cada mudanca de tamanho
+        window.decorView.addOnLayoutChangeListener { _, l, t, r, b, el, et, er, eb ->
+            if (r - l != er - el || b - t != eb - et) {
+                val lp = window.attributes
+                moverPara(lp.x, lp.y)
+            }
+        }
 
         carregando()
         if (!lerComFoco) iniciar(textoDe(intent))
@@ -159,15 +166,17 @@ abstract class PopupActivity : Activity() {
         moverPara(lp.x, lp.y)  // tela mudou -> limites mudaram
     }
 
-    // sem sair da tela. antes de medir (onCreate) o tamanho e 0: limite largo,
-    // o sistema ainda segura a janela dentro da tela
+    // sem sair da tela (ajustarPosicao). antes de medir o tamanho e 0: limite largo,
+    // por isso o primeiro layout reajusta (ver onCreate)
     private fun moverPara(x: Int, y: Int) {
         val tela = resources.displayMetrics
         val v = window.decorView
         val lp = window.attributes
-        val folgaX = maxOf(0, (tela.widthPixels - v.width) / 2)
-        lp.x = x.coerceIn(-folgaX, folgaX)
-        lp.y = y.coerceIn(0, maxOf(0, tela.heightPixels - v.height))
+        val p = ajustarPosicao(Pos(x, y), Tamanho(tela.widthPixels, tela.heightPixels),
+            Tamanho(v.width, v.height), centradaX = true)
+        if (lp.x == p.x && lp.y == p.y) return
+        lp.x = p.x
+        lp.y = p.y
         window.attributes = lp
     }
 
