@@ -96,7 +96,7 @@ abstract class PopupActivity : Activity() {
         moverPara(prefs.getInt("x", 0), prefs.getInt("y", 0))
         ajustarLargura()
 
-        mostrar("Traduzindo…")
+        carregando()
         if (!lerComFoco) iniciar(textoDe(intent))
     }
 
@@ -154,6 +154,17 @@ abstract class PopupActivity : Activity() {
         window.attributes = lp
     }
 
+    // "Traduzindo…": o tempo fica parado e a barra vazia ate o resultado ou erro
+    private fun carregando() {
+        label.text = "Traduzindo…"
+        painel.setColor(corFundo())
+        label.setTextColor(corTexto())
+        barra.cor = corDestaque()
+        cronometro.parar()
+        handler.removeCallbacks(tick)
+        barra.fracao = 0f
+    }
+
     // define o conteudo e reinicia o tempo. erro = fundo vermelho, texto branco (nos dois temas).
     fun mostrar(texto: String, erro: Boolean = false) {
         label.text = texto
@@ -198,7 +209,7 @@ abstract class PopupActivity : Activity() {
                 if (pausado) {
                     pausado = false
                     cronometro.retomar(SystemClock.uptimeMillis())
-                    handler.postDelayed(tick, TICK_MS)
+                    if (cronometro.iniciado) handler.postDelayed(tick, TICK_MS)
                 }
                 if (arrastando) {
                     arrastando = false
