@@ -1,5 +1,10 @@
 package com.conan.tradutor
 
+import java.io.IOException
+import java.net.ConnectException
+import java.net.NoRouteToHostException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.net.URLEncoder
 
 // Kotlin puro (sem Android): a busca HTTP vem de fora, recebe a URL e devolve o corpo
@@ -10,18 +15,29 @@ sealed class Resultado {
     data class Erro(val motivo: String) : Resultado()
 }
 
+// busca lanca isto em resposta HTTP diferente de 200
+class ErroHttp(val codigo: Int) : IOException("HTTP $codigo")
+
 fun traduzir(texto: String, buscar: (String) -> String): Resultado {
     if (texto.length > MAX_CHARS) return Resultado.GrandeDemais(texto.length)
     val corpo = try {
         buscar(urlTraducao(texto))
     } catch (e: Exception) {
-        return Resultado.Erro(e.message ?: e.javaClass.simpleName)
+        return Resultado.Erro(motivoDe(e))
     }
     return try {
         Resultado.Traducao(extrair(corpo))
     } catch (e: Exception) {
-        Resultado.Erro("Resposta inesperada do tradutor")
+        Resultado.Erro("Resposta inesperada do Google Tradutor")
     }
+}
+
+// motivo legivel em pt-BR; caso desconhecido cai na mensagem da excecao
+private fun motivoDe(e: Exception): String = when (e) {
+    is ErroHttp -> "Erro do servidor (HTTP ${e.codigo})"
+    is SocketTimeoutException -> "Tempo esgotado"
+    is UnknownHostException, is ConnectException, is NoRouteToHostException -> "Sem conexão com a internet"
+    else -> e.message ?: e.javaClass.simpleName
 }
 
 fun urlTraducao(texto: String): String =
@@ -39,7 +55,7 @@ private fun extrair(corpo: String): String {
     }
 }
 
-// parser JSON minimo (so o necessario): listas, strings, numeros, true/false/null, objetos
+// parser JSON minimo (so o necessario): listas, strings, numeros, true/false/null; objeto vira erro
 private class JsonMini(private val s: String) {
     private var i = 0
 
@@ -65,22 +81,6 @@ private class JsonMini(private val s: String) {
                     l.add(valor()); espaco()
                     when (s.getOrNull(i++)) { ',' -> {} ; ']' -> return l; else -> error("lista") }
                 }
-                @Suppress("UNREACHABLE_CODE") l
-            }
-            '{' -> {
-                i++
-                val m = HashMap<String, Any?>()
-                espaco()
-                if (s.getOrNull(i) == '}') { i++; return m }
-                while (true) {
-                    espaco()
-                    val k = valor() as? String ?: error("chave")
-                    espaco()
-                    if (s.getOrNull(i++) != ':') error("':'")
-                    m[k] = valor(); espaco()
-                    when (s.getOrNull(i++)) { ',' -> {} ; '}' -> return m; else -> error("objeto") }
-                }
-                @Suppress("UNREACHABLE_CODE") m
             }
             '"' -> string()
             else -> if (c == '-' || c.isDigit()) numero() else literal()

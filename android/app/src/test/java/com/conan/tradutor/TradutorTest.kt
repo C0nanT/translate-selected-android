@@ -5,6 +5,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.IOException
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class TradutorTest {
     private fun resp(vararg partes: String) =
@@ -48,6 +51,22 @@ class TradutorTest {
         assertTrue((r as Resultado.Erro).motivo.contains("sem rede"))
     }
 
+    private fun motivo(r: Resultado) = (r as Resultado.Erro).motivo
+
+    @Test fun timeoutViraTempoEsgotado() {
+        assertEquals("Tempo esgotado", motivo(traduzir("x") { throw SocketTimeoutException("Read timed out") }))
+    }
+
+    @Test fun semConexaoViraMensagemClara() {
+        for (e in listOf(UnknownHostException("translate.googleapis.com"), ConnectException("refused"))) {
+            assertEquals("Sem conexão com a internet", motivo(traduzir("x") { throw e }))
+        }
+    }
+
+    @Test fun httpNao200ViraErroDoServidor() {
+        assertEquals("Erro do servidor (HTTP 503)", motivo(traduzir("x") { throw ErroHttp(503) }))
+    }
+
     @Test fun jsonInvalidoViraErro() {
         assertTrue(traduzir("x") { "<html>oops" } is Resultado.Erro)
         assertTrue(traduzir("x") { "" } is Resultado.Erro)
@@ -59,6 +78,7 @@ class TradutorTest {
         assertTrue(traduzir("x") { "[]" } is Resultado.Erro)
         assertTrue(traduzir("x") { "[[1]]" } is Resultado.Erro)
         assertTrue(traduzir("x") { "[[[5]]]" } is Resultado.Erro)
+        assertEquals("Resposta inesperada do Google Tradutor", motivo(traduzir("x") { "[]" }))
     }
 
     @Test fun urlComParametrosETextoCodificado() {
