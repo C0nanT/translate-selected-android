@@ -73,8 +73,13 @@ class BolhaService : Service() {
         val lp = WindowManager.LayoutParams(lado, lado, tipo,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = resources.displayMetrics.widthPixels - lado
-            y = resources.displayMetrics.heightPixels / 3
+            val tela = resources.displayMetrics
+            val salva = getSharedPreferences(PREFS, MODE_PRIVATE)
+            val p = ajustarPosicao(
+                Pos(salva.getInt("x", tela.widthPixels - lado), salva.getInt("y", tela.heightPixels / 3)),
+                Tamanho(tela.widthPixels, tela.heightPixels), Tamanho(lado, lado), centradaX = false)
+            x = p.x
+            y = p.y
         }
         val v = TextView(this).apply {
             text = "文"
@@ -103,11 +108,19 @@ class BolhaService : Service() {
                         arrastou = true
                         v.removeCallbacks(desligarSegurando)
                     }
-                    if (arrastou) { lp.x = x0 + dx.toInt(); lp.y = y0 + dy.toInt(); wm.updateViewLayout(v, lp) }
+                    if (arrastou) {
+                        val tela = resources.displayMetrics
+                        val p = ajustarPosicao(Pos(x0 + dx.toInt(), y0 + dy.toInt()),
+                            Tamanho(tela.widthPixels, tela.heightPixels), Tamanho(lado, lado), centradaX = false)
+                        lp.x = p.x; lp.y = p.y
+                        wm.updateViewLayout(v, lp)
+                    }
                 }
                 MotionEvent.ACTION_UP -> {
                     v.removeCallbacks(desligarSegurando)
-                    if (!arrastou) traduzirCopiado()
+                    if (arrastou) {
+                        getSharedPreferences(PREFS, MODE_PRIVATE).edit().putInt("x", lp.x).putInt("y", lp.y).apply()
+                    } else traduzirCopiado()
                 }
                 MotionEvent.ACTION_CANCEL -> v.removeCallbacks(desligarSegurando)
             }
@@ -133,5 +146,6 @@ class BolhaService : Service() {
     companion object {
         const val ACAO_DESLIGAR = "com.conan.tradutor.DESLIGAR"
         private const val CANAL = "bolha"
+        private const val PREFS = "bolha"  // ultima posicao (x, y do canto superior esquerdo)
     }
 }
