@@ -23,6 +23,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import java.lang.ref.WeakReference
+import java.util.concurrent.Future
 import kotlin.math.abs
 
 // popup ancorado embaixo, por cima do app de origem. Toque fora fecha (tema).
@@ -46,6 +47,7 @@ abstract class PopupActivity : Activity() {
     // entrada que mostra aviso vermelho quando nao ha o que traduzir (bolha); as outras fecham caladas
     protected open val avisaVazio = false
     private var iniciado = false
+    private var pedido: Future<*>? = null
 
     private lateinit var label: TextView
     private lateinit var barra: BarraTempo
@@ -122,10 +124,10 @@ abstract class PopupActivity : Activity() {
         // rede fora da thread principal. a thread so guarda referencia fraca:
         // popup fechado nao fica preso na memoria e o resultado e descartado.
         val ref = WeakReference(this)
-        Thread {
+        pedido = Requisicoes.executor.submit {
             val r = traduzir(texto, ::buscarHttp)
             Handler(Looper.getMainLooper()).post { ref.get()?.aplicar(r) }
-        }.start()
+        }
     }
 
     private fun semTexto(aviso: String) {
@@ -247,6 +249,7 @@ abstract class PopupActivity : Activity() {
     override fun onDestroy() {
         handler.removeCallbacks(tick)
         handler.removeCallbacks(armarArrasto)
+        pedido?.cancel(true)  // fechou cedo: descarta o pedido (tira da fila ou interrompe)
         super.onDestroy()
     }
 
