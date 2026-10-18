@@ -39,9 +39,12 @@ fun traduzir(bruto: String, buscar: (String) -> String): Resultado {
     val texto = juntarLinhas(bruto)
     if (texto.isBlank()) return Resultado.Vazio
     if (texto.none { it.isLetter() }) return Resultado.SemLetras
-    if (texto.length > MAX_CHARS) return Resultado.GrandeDemais(texto.length)
+    val n = texto.codePointCount(0, texto.length)  // emoji conta 1, como len() no PC
+    if (n > MAX_CHARS) return Resultado.GrandeDemais(n)
+    val url = urlTraducao(texto)
+    if (url.length > MAX_URL) return Resultado.GrandeDemais(n)
     val corpo = try {
-        buscar(urlTraducao(texto))
+        buscar(url)
     } catch (e: Exception) {
         return Resultado.Erro(motivoDe(e))
     }
