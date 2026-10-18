@@ -21,6 +21,7 @@ class ErroHttp(val codigo: Int) : IOException("HTTP $codigo")
 // texto copiado de PDF traz \n em cada fim de linha (e hifen em palavra cortada);
 // o Google traduz cada linha solta e perde o contexto. Junta as linhas; linha em
 // branco continua separando paragrafos.
+// Copia em juntar_linhas de tradutor.py (PC): manter as duas iguais.
 fun juntarLinhas(texto: String): String =
     texto.replace("\r\n", "\n")
         .split(Regex("\n[ \t]*\n\\s*"))
