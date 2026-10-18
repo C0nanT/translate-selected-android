@@ -15,8 +15,10 @@ import android.os.Build
 import android.os.IBinder
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.widget.TextView
 import kotlin.math.abs
@@ -81,17 +83,32 @@ class BolhaService : Service() {
             background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(corDestaque()) }
             alpha = 0.85f
         }
-        // arrastar move; toque curto sem mexer traduz
+        // arrastar move (alem do slop do sistema); toque curto traduz; segurar parado desliga com vibracao
+        val slop = ViewConfiguration.get(this).scaledTouchSlop
+        val desligarSegurando = Runnable {
+            v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            stopSelf()
+        }
         var x0 = 0; var y0 = 0; var rx = 0f; var ry = 0f; var arrastou = false
         v.setOnTouchListener { _, ev ->
             when (ev.actionMasked) {
-                MotionEvent.ACTION_DOWN -> { x0 = lp.x; y0 = lp.y; rx = ev.rawX; ry = ev.rawY; arrastou = false }
+                MotionEvent.ACTION_DOWN -> {
+                    x0 = lp.x; y0 = lp.y; rx = ev.rawX; ry = ev.rawY; arrastou = false
+                    v.postDelayed(desligarSegurando, ViewConfiguration.getLongPressTimeout().toLong())
+                }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = ev.rawX - rx; val dy = ev.rawY - ry
-                    if (abs(dx) > dp(8) || abs(dy) > dp(8)) arrastou = true
+                    if (!arrastou && (abs(dx) > slop || abs(dy) > slop)) {
+                        arrastou = true
+                        v.removeCallbacks(desligarSegurando)
+                    }
                     if (arrastou) { lp.x = x0 + dx.toInt(); lp.y = y0 + dy.toInt(); wm.updateViewLayout(v, lp) }
                 }
-                MotionEvent.ACTION_UP -> if (!arrastou) traduzirCopiado()
+                MotionEvent.ACTION_UP -> {
+                    v.removeCallbacks(desligarSegurando)
+                    if (!arrastou) traduzirCopiado()
+                }
+                MotionEvent.ACTION_CANCEL -> v.removeCallbacks(desligarSegurando)
             }
             true
         }
