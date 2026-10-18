@@ -17,7 +17,7 @@
              se mudar IDIOMA_DESTINO (Config.kt), trocar tambem o android:label -->
         <activity
             android:name=".ProcessTextActivity"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode"
             android:excludeFromRecents="true"
             android:exported="true"
             android:label="Traduzir pt-BR"
@@ -45,7 +45,7 @@
         <!-- toque na bolha: traduz o que foi copiado -->
         <activity
             android:name=".ClipboardActivity"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode"
             android:excludeFromRecents="true"
             android:exported="false"
             android:taskAffinity=""
