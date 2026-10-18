@@ -30,6 +30,10 @@ abstract class PopupActivity : Activity() {
 
     protected abstract fun textoDe(intent: Intent): String?
 
+    // entrada que so consegue ler o texto com a janela em foco (area de transferencia)
+    protected open val lerComFoco = false
+    private var iniciado = false
+
     private lateinit var label: TextView
     private lateinit var barra: BarraTempo
     private val painel = GradientDrawable()
@@ -56,9 +60,6 @@ abstract class PopupActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val texto = textoDe(intent)?.trim().orEmpty()
-        if (texto.isEmpty()) { finish(); return }
-
         val pad = dp(16)
         label = TextView(this).apply {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
@@ -80,6 +81,18 @@ abstract class PopupActivity : Activity() {
         ajustarLargura()
 
         mostrar("Traduzindo…")
+        if (!lerComFoco) iniciar(textoDe(intent))
+    }
+
+    override fun onWindowFocusChanged(foco: Boolean) {
+        super.onWindowFocusChanged(foco)
+        if (foco && lerComFoco && !iniciado) iniciar(textoDe(intent))
+    }
+
+    private fun iniciar(bruto: String?) {
+        iniciado = true
+        val texto = bruto?.trim().orEmpty()
+        if (texto.isEmpty()) { finish(); return }
         // rede fora da thread principal. a thread so guarda referencia fraca:
         // popup fechado nao fica preso na memoria e o resultado e descartado.
         val ref = WeakReference(this)
