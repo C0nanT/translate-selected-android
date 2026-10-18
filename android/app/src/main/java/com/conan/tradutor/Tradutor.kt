@@ -18,7 +18,22 @@ sealed class Resultado {
 // busca lanca isto em resposta HTTP diferente de 200
 class ErroHttp(val codigo: Int) : IOException("HTTP $codigo")
 
-fun traduzir(texto: String, buscar: (String) -> String): Resultado {
+// texto copiado de PDF traz \n em cada fim de linha (e hifen em palavra cortada);
+// o Google traduz cada linha solta e perde o contexto. Junta as linhas; linha em
+// branco continua separando paragrafos.
+fun juntarLinhas(texto: String): String =
+    texto.replace("\r\n", "\n")
+        .split(Regex("\n[ \t]*\n\\s*"))
+        .joinToString("\n\n") { par ->
+            par.replace(Regex("-[ \t]*\n[ \t]*(?=\\p{Ll})"), "")  // dis-|tributed
+                .replace(Regex("-[ \t]*\n[ \t]*"), "-")              // Monolith-|To
+                .replace(Regex("[ \t]*\n[ \t]*"), " ")
+                .replace(Regex("[ \t]{2,}"), " ")
+                .trim()
+        }
+
+fun traduzir(bruto: String, buscar: (String) -> String): Resultado {
+    val texto = juntarLinhas(bruto)
     if (texto.length > MAX_CHARS) return Resultado.GrandeDemais(texto.length)
     val corpo = try {
         buscar(urlTraducao(texto))
