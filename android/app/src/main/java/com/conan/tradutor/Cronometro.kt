@@ -5,18 +5,18 @@ package com.conan.tradutor
 class Cronometro(private val totalMs: Long) {
     var restanteMs = totalMs
         private set
-    private var ativo = false      // ja foi iniciado
-    val iniciado get() = ativo
+    var iniciado = false           // ja foi iniciado
+        private set
     private var pausado = false
     private var ultimo = 0L
 
-    val acabou get() = ativo && restanteMs <= 0
+    val acabou get() = iniciado && restanteMs <= 0
     val fracao get() = (restanteMs.toFloat() / totalMs).coerceIn(0f, 1f)
 
     // (re)inicia com o tempo cheio; se o dedo esta encostado, so corre ao soltar
     fun iniciar(agora: Long) {
         restanteMs = totalMs
-        ativo = true
+        iniciado = true
         ultimo = agora
     }
 
@@ -24,7 +24,7 @@ class Cronometro(private val totalMs: Long) {
     // o dedo encostado (pausado) continua valendo
     fun parar() {
         restanteMs = totalMs
-        ativo = false
+        iniciado = false
     }
 
     fun pausar(agora: Long) {
@@ -40,7 +40,7 @@ class Cronometro(private val totalMs: Long) {
 
     // desconta o tempo corrido desde a ultima chamada e devolve o restante
     fun descontar(agora: Long): Long {
-        if (ativo && !pausado) {
+        if (iniciado && !pausado) {
             restanteMs = maxOf(0L, restanteMs - (agora - ultimo))
             ultimo = agora
         }

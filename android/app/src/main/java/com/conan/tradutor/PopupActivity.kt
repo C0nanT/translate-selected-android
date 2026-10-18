@@ -48,6 +48,7 @@ abstract class PopupActivity : Activity() {
     protected open val avisaVazio = false
     private var iniciado = false
     private var pedido: Future<*>? = null
+    private val busca = BuscaHttp()
 
     private lateinit var label: TextView
     private lateinit var barra: BarraTempo
@@ -127,12 +128,12 @@ abstract class PopupActivity : Activity() {
     private fun iniciar(bruto: String?) {
         iniciado = true
         val texto = bruto?.trim().orEmpty()
-        if (texto.isEmpty()) { semTexto("Nada copiado"); return }
+        if (texto.isEmpty()) { semTexto(NADA_COPIADO); return }
         // rede fora da thread principal. a thread so guarda referencia fraca:
         // popup fechado nao fica preso na memoria e o resultado e descartado.
         val ref = WeakReference(this)
         pedido = Requisicoes.executor.submit {
-            val r = traduzir(texto, ::buscarHttp)
+            val r = traduzir(texto, busca::buscar)
             Handler(Looper.getMainLooper()).post { ref.get()?.aplicar(r) }
         }
     }
@@ -146,7 +147,7 @@ abstract class PopupActivity : Activity() {
         when (r) {
             is Resultado.Traducao -> mostrar(r.texto)
             is Resultado.GrandeDemais -> mostrar("Texto grande demais (${r.n} caracteres)", erro = true)
-            Resultado.Vazio -> semTexto("Nada copiado")
+            Resultado.Vazio -> semTexto(NADA_COPIADO)
             Resultado.SemLetras -> semTexto("Nada para traduzir")
             is Resultado.Erro -> mostrar(r.motivo, erro = true)
         }
@@ -258,6 +259,7 @@ abstract class PopupActivity : Activity() {
     override fun onDestroy() {
         handler.removeCallbacks(tick)
         handler.removeCallbacks(armarArrasto)
+        busca.cancelar()  // HttpURLConnection ignora interrupt: derruba a conexao em curso
         pedido?.cancel(true)  // fechou cedo: descarta o pedido (tira da fila ou interrompe)
         super.onDestroy()
     }
@@ -290,6 +292,7 @@ abstract class PopupActivity : Activity() {
     }
 
     private companion object {
+        const val NADA_COPIADO = "Nada copiado"
         const val TICK_MS = 50L
         const val PREFS = "popup"  // posicao arrastada (x, y da gravidade)
         const val HIDE_MS = HIDE_AFTER_S * 1000L  // unico lugar que converte p/ ms
