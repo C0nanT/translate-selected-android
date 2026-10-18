@@ -15,15 +15,19 @@ import android.os.SystemClock
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.MotionEvent
+import android.view.HapticFeedbackConstants
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import java.lang.ref.WeakReference
+import kotlin.math.abs
 
 // popup ancorado embaixo, por cima do app de origem. Toque fora fecha (tema).
 // some sozinho em HIDE_AFTER_S; dedo encostado pausa o tempo. Sem botoes.
+// segurar e arrastar move; o proximo abre no mesmo lugar (salvo em prefs).
 // erro: fundo vermelho com o motivo (igual ao Linux).
 // cada entrada (selecao, compartilhar...) so diz de onde vem o texto.
 abstract class PopupActivity : Activity() {
@@ -41,6 +45,22 @@ abstract class PopupActivity : Activity() {
     private var restanteMs = HIDE_MS
     private var ultimoTick = 0L
     private var pausado = false
+
+    // arrasto: so arma depois de segurar parado (arrastar direto rola o texto)
+    private var arrastando = false
+    private var dedoX = 0f
+    private var dedoY = 0f
+    private val armarArrasto = Runnable { armar() }
+
+    private fun armar() {
+        arrastando = true
+        window.decorView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        // rolagem para de seguir o dedo; o resto do gesto fica com o arrasto
+        val agora = SystemClock.uptimeMillis()
+        val cancelar = MotionEvent.obtain(agora, agora, MotionEvent.ACTION_CANCEL, dedoX, dedoY, 0)
+        super.dispatchTouchEvent(cancelar)
+        cancelar.recycle()
+    }
 
     // so roda com o tempo correndo; pausa tira o tick da fila
     private val tick = object : Runnable {
@@ -77,7 +97,10 @@ abstract class PopupActivity : Activity() {
         // fundo proprio (cantos arredondados) p/ poder ficar vermelho no erro
         painel.cornerRadius = dp(12).toFloat()
         window.setBackgroundDrawable(InsetDrawable(painel, dp(8)))
+        // gravidade embaixo/centro: x = desvio do centro, y = distancia da borda de baixo
         window.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+        val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
+        moverPara(prefs.getInt("x", 0), prefs.getInt("y", 0))
         ajustarLargura()
 
         mostrar("Traduzindo…")
@@ -122,6 +145,20 @@ abstract class PopupActivity : Activity() {
     override fun onConfigurationChanged(novo: Configuration) {
         super.onConfigurationChanged(novo)
         ajustarLargura()
+        val lp = window.attributes
+        moverPara(lp.x, lp.y)  // tela mudou -> limites mudaram
+    }
+
+    // sem sair da tela. antes de medir (onCreate) o tamanho e 0: limite largo,
+    // o sistema ainda segura a janela dentro da tela
+    private fun moverPara(x: Int, y: Int) {
+        val tela = resources.displayMetrics
+        val v = window.decorView
+        val lp = window.attributes
+        val folgaX = maxOf(0, (tela.widthPixels - v.width) / 2)
+        lp.x = x.coerceIn(-folgaX, folgaX)
+        lp.y = y.coerceIn(0, maxOf(0, tela.heightPixels - v.height))
+        window.attributes = lp
     }
 
     // define o conteudo e reinicia o tempo. erro = fundo vermelho, texto branco (nos dois temas).
@@ -141,18 +178,42 @@ abstract class PopupActivity : Activity() {
         if (!pausado) handler.postDelayed(tick, TICK_MS)
     }
 
-    // dedo no popup para o tick; soltar retoma de onde parou
+    // dedo no popup para o tick; soltar retoma de onde parou.
+    // segurar parado arma o arrasto; dai em diante o dedo move a janela.
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         when (ev.actionMasked) {
-            MotionEvent.ACTION_DOWN -> if (!pausado) {
-                pausado = true
-                descontar()
-                handler.removeCallbacks(tick)
+            MotionEvent.ACTION_DOWN -> {
+                if (!pausado) {
+                    pausado = true
+                    descontar()
+                    handler.removeCallbacks(tick)
+                }
+                dedoX = ev.rawX; dedoY = ev.rawY
+                handler.postDelayed(armarArrasto, ViewConfiguration.getLongPressTimeout().toLong())
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> if (pausado) {
-                pausado = false
-                ultimoTick = SystemClock.uptimeMillis()
-                handler.postDelayed(tick, TICK_MS)
+            MotionEvent.ACTION_MOVE -> if (arrastando) {
+                // rawX/rawY: a janela anda junto com o dedo, coordenada local nao serve
+                val lp = window.attributes
+                moverPara(lp.x + (ev.rawX - dedoX).toInt(), lp.y - (ev.rawY - dedoY).toInt())
+                dedoX = ev.rawX; dedoY = ev.rawY
+                return true
+            } else {
+                val slop = ViewConfiguration.get(this).scaledTouchSlop
+                if (abs(ev.rawX - dedoX) > slop || abs(ev.rawY - dedoY) > slop) handler.removeCallbacks(armarArrasto)
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                handler.removeCallbacks(armarArrasto)
+                if (pausado) {
+                    pausado = false
+                    ultimoTick = SystemClock.uptimeMillis()
+                    handler.postDelayed(tick, TICK_MS)
+                }
+                if (arrastando) {
+                    arrastando = false
+                    val lp = window.attributes
+                    getSharedPreferences(PREFS, MODE_PRIVATE).edit().putInt("x", lp.x).putInt("y", lp.y).apply()
+                    return true  // filhos ja receberam CANCEL
+                }
             }
         }
         return super.dispatchTouchEvent(ev)
@@ -160,6 +221,7 @@ abstract class PopupActivity : Activity() {
 
     override fun onDestroy() {
         handler.removeCallbacks(tick)
+        handler.removeCallbacks(armarArrasto)
         super.onDestroy()
     }
 
@@ -196,6 +258,7 @@ abstract class PopupActivity : Activity() {
 
     private companion object {
         const val TICK_MS = 50L
+        const val PREFS = "popup"  // posicao arrastada (x, y da gravidade)
         const val HIDE_MS = HIDE_AFTER_S * 1000L  // unico lugar que converte p/ ms
     }
 }
