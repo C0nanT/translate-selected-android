@@ -1,9 +1,11 @@
 package com.conan.tradutor
 
+import com.google.gson.JsonParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.File
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
@@ -127,25 +129,21 @@ class TradutorTest {
         assertTrue(url, url.endsWith("q=ol%C3%A1+mundo%26x%3D1"))
     }
 
-    // texto copiado de PDF: cada fim de linha vira \n e palavras cortadas tem hifen
-    @Test fun quebraSimplesViraEspaco() {
-        assertEquals("has a whole host of advantages", juntarLinhas("has a whole\nhost of advantages"))
-    }
-
-    @Test fun hifenNoFimDaLinhaJuntaPalavra() {
-        assertEquals("associated with distributed systems", juntarLinhas("associated with dis-\ntributed systems"))
-    }
-
-    @Test fun hifenAntesDeMaiusculaFica() {
-        assertEquals("Monolith-To", juntarLinhas("Monolith-\nTo"))
-    }
-
-    @Test fun linhaEmBrancoSeparaParagrafos() {
-        assertEquals("um dois\n\ntres", juntarLinhas("um\ndois\n\n\ntres"))
-    }
-
-    @Test fun crlfEEspacosNaQuebra() {
-        assertEquals("a b c", juntarLinhas("a  \r\n  b\r\nc"))
+    // os casos moram em casos/juntar_linhas.json (raiz) e valem tambem para o PC
+    @Test fun casosCompartilhadosDeJuntarLinhas() {
+        val arquivo = generateSequence(File("").absoluteFile) { it.parentFile }
+            .map { File(it, "casos/juntar_linhas.json") }
+            .first { it.exists() }
+        val casos = JsonParser.parseString(arquivo.readText()).asJsonArray
+        assertTrue(casos.size() > 0)
+        for (c in casos) {
+            val o = c.asJsonObject
+            assertEquals(
+                "caso quebrado: " + o["nome"].asString,
+                o["esperado"].asString,
+                juntarLinhas(o["entrada"].asString),
+            )
+        }
     }
 
     @Test fun traduzirEnviaTextoJuntado() {
