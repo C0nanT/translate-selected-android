@@ -11,7 +11,7 @@
   {"name": "part that is not a list", "body": "[[1]]", "expected": {"type": "failure", "reason": "Resposta inesperada do Google Tradutor"}},
   {"name": "part text that is not a string", "body": "[[[5]]]", "expected": {"type": "failure", "reason": "Resposta inesperada do Google Tradutor"}},
   {"name": "string instead of the parts list", "body": "[\"abc\"]", "expected": {"type": "failure", "reason": "Resposta inesperada do Google Tradutor"}},
-  {"name": "string no lugar de one part", "body": "[[\"abc\"]]", "expected": {"type": "failure", "reason": "Resposta inesperada do Google Tradutor"}},
+  {"name": "string instead of one part", "body": "[[\"abc\"]]", "expected": {"type": "failure", "reason": "Resposta inesperada do Google Tradutor"}},
   {"name": "object instead of the parts", "body": "[{\"a\":1}]", "expected": {"type": "failure", "reason": "Resposta inesperada do Google Tradutor"}},
   {"name": "empty part (no text)", "body": "[[[]]]", "expected": {"type": "failure", "reason": "Resposta inesperada do Google Tradutor"}}
 ]
