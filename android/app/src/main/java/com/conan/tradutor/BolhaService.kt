@@ -139,9 +139,9 @@ class BolhaService : Service() {
     }
 
     // posicao da bolha (lado x lado) sem sair da tela
-    private fun naTela(x: Int, y: Int, lado: Int): Pos {
+    private fun naTela(x: Int, y: Int, lado: Int): Position {
         val tela = resources.displayMetrics
-        return ajustarPosicao(Pos(x, y), Tamanho(tela.widthPixels, tela.heightPixels), Tamanho(lado, lado), centradaX = false)
+        return clampPosition(Position(x, y), Size(tela.widthPixels, tela.heightPixels), Size(lado, lado), centeredX = false)
     }
 
     private val toques = Toques(TOQUE_REPETIDO_MS)

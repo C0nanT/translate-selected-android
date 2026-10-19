@@ -54,7 +54,7 @@ abstract class PopupActivity : Activity() {
     private lateinit var barra: BarraTempo
     private val painel = GradientDrawable()
     private val handler = Handler(Looper.getMainLooper())
-    private val cronometro = Cronometro(HIDE_MS)
+    private val stopwatch = Stopwatch(HIDE_MS)
     private var pausado = false
     private var emErro = false
 
@@ -77,9 +77,9 @@ abstract class PopupActivity : Activity() {
     // so roda com o tempo correndo; pausa tira o tick da fila
     private val tick = object : Runnable {
         override fun run() {
-            cronometro.descontar(SystemClock.uptimeMillis())
-            if (cronometro.acabou) { finish(); return }
-            barra.fracao = cronometro.fracao
+            stopwatch.elapse(SystemClock.uptimeMillis())
+            if (stopwatch.finished) { finish(); return }
+            barra.fracao = stopwatch.fraction
             handler.postDelayed(this, TICK_MS)
         }
     }
@@ -169,14 +169,14 @@ abstract class PopupActivity : Activity() {
         moverPara(lp.x, lp.y)  // tela mudou -> limites mudaram
     }
 
-    // sem sair da tela (ajustarPosicao). antes de medir o tamanho e 0: limite largo,
+    // sem sair da tela (clampPosition). antes de medir o tamanho e 0: limite largo,
     // por isso o primeiro layout reajusta (ver onCreate)
     private fun moverPara(x: Int, y: Int) {
         val tela = resources.displayMetrics
         val v = window.decorView
         val lp = window.attributes
-        val p = ajustarPosicao(Pos(x, y), Tamanho(tela.widthPixels, tela.heightPixels),
-            Tamanho(v.width, v.height), centradaX = true)
+        val p = clampPosition(Position(x, y), Size(tela.widthPixels, tela.heightPixels),
+            Size(v.width, v.height), centeredX = true)
         if (lp.x == p.x && lp.y == p.y) return
         lp.x = p.x
         lp.y = p.y
@@ -188,7 +188,7 @@ abstract class PopupActivity : Activity() {
         label.text = "Traduzindo…"
         emErro = false
         pintar()
-        cronometro.parar()
+        stopwatch.stop()
         handler.removeCallbacks(tick)
         barra.fracao = 0f
     }
@@ -209,7 +209,7 @@ abstract class PopupActivity : Activity() {
     }
 
     private fun reiniciarTempo() {
-        cronometro.iniciar(SystemClock.uptimeMillis())
+        stopwatch.start(SystemClock.uptimeMillis())
         barra.fracao = 1f
         handler.removeCallbacks(tick)
         if (!pausado) handler.postDelayed(tick, TICK_MS)
@@ -222,7 +222,7 @@ abstract class PopupActivity : Activity() {
             MotionEvent.ACTION_DOWN -> {
                 if (!pausado) {
                     pausado = true
-                    cronometro.pausar(SystemClock.uptimeMillis())
+                    stopwatch.pause(SystemClock.uptimeMillis())
                     handler.removeCallbacks(tick)
                 }
                 dedoX = ev.rawX; dedoY = ev.rawY
@@ -242,8 +242,8 @@ abstract class PopupActivity : Activity() {
                 handler.removeCallbacks(armarArrasto)
                 if (pausado) {
                     pausado = false
-                    cronometro.retomar(SystemClock.uptimeMillis())
-                    if (cronometro.iniciado) handler.postDelayed(tick, TICK_MS)
+                    stopwatch.resume(SystemClock.uptimeMillis())
+                    if (stopwatch.started) handler.postDelayed(tick, TICK_MS)
                 }
                 if (arrastando) {
                     arrastando = false
