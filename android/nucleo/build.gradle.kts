@@ -22,5 +22,5 @@ dependencies {
 
 // os testes leem os casos compartilhados da raiz: mudar um caso invalida o cache do teste
 tasks.withType<Test>().configureEach {
-    inputs.dir(rootProject.file("../casos")).withPropertyName("casos")
+    inputs.dir(rootProject.file("../cases")).withPropertyName("cases")
 }
