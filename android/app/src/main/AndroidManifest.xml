@@ -11,7 +11,7 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@android:drawable/ic_menu_edit"
+        android:icon="@mipmap/ic_launcher"
         android:label="Tradutor"
         android:supportsRtl="true">
 
@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
 
-        <!-- icone do app: liga a bolha -->
+        <!-- icone do app: liga/desliga a bolha -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -60,6 +60,18 @@
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="bolha flutuante que traduz o texto copiado" />
+        </service>
+
+        <!-- bloco nas Configuracoes rapidas (Android 7+): liga/desliga a bolha -->
+        <service
+            android:name=".BolhaTile"
+            android:exported="true"
+            android:icon="@drawable/ic_traduzir"
+            android:label="Tradutor"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
         </service>
     </application>
 </manifest>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- mesmo azul da bolha (corDestaque, tema claro) -->
+    <color name="bolha">#1A73E8</color>
+</resources>
