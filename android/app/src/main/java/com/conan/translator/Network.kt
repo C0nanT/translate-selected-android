@@ -24,11 +24,11 @@ class HttpFetcher {
     @Volatile private var cancelled = false
 
     fun fetch(url: String): String {
-        if (cancelled) throw IOException("cancelled")
+        if (cancelled) throw IOException("cancelado")  // user-facing message, kept in pt-BR
         val c = URL(url).openConnection() as HttpURLConnection
         connection = c
         try {
-            if (cancelled) throw IOException("cancelled")  // cancel() may have run before the connection was stored
+            if (cancelled) throw IOException("cancelado")  // cancel() may have run before the connection was stored
             c.connectTimeout = 10_000
             c.readTimeout = 10_000
             c.setRequestProperty("User-Agent", "Mozilla/5.0")

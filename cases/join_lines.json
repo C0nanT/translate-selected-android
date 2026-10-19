@@ -16,8 +16,8 @@
   },
   {
     "name": "blank line separates paragraphs",
-    "input": "um\ndois\n\n\ntres",
-    "expected": "um dois\n\ntres"
+    "input": "one\ntwo\n\n\nthree",
+    "expected": "one two\n\nthree"
   },
   {
     "name": "CRLF and spaces at the break",
