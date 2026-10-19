@@ -129,12 +129,13 @@ class TradutorTest {
         assertTrue(url, url.endsWith("q=ol%C3%A1+mundo%26x%3D1"))
     }
 
+    private fun casosFile(nome: String) = generateSequence(File("").absoluteFile) { it.parentFile }
+        .map { File(it, "casos/$nome") }
+        .first { it.exists() }
+
     // os casos moram em casos/juntar_linhas.json (raiz) e valem tambem para o PC
     @Test fun casosCompartilhadosDeJuntarLinhas() {
-        val arquivo = generateSequence(File("").absoluteFile) { it.parentFile }
-            .map { File(it, "casos/juntar_linhas.json") }
-            .first { it.exists() }
-        val casos = JsonParser.parseString(arquivo.readText()).asJsonArray
+        val casos = JsonParser.parseString(casosFile("juntar_linhas.json").readText()).asJsonArray
         assertTrue(casos.size() > 0)
         for (c in casos) {
             val o = c.asJsonObject
@@ -143,6 +144,34 @@ class TradutorTest {
                 o["esperado"].asString,
                 juntarLinhas(o["entrada"].asString),
             )
+        }
+    }
+
+    // os casos moram em casos/validacao.json (raiz) e valem tambem para o PC
+    @Test fun casosCompartilhadosDeValidacao() {
+        val base = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q="
+        val casos = JsonParser.parseString(casosFile("validacao.json").readText()).asJsonArray
+        assertTrue(casos.size() > 0)
+        for (c in casos) {
+            val o = c.asJsonObject
+            val nome = "caso quebrado: " + o["nome"].asString
+            val vezes = o["vezes"]?.asInt ?: 1
+            val esp = o["esperado"].asJsonObject
+            val urls = mutableListOf<String>()
+            val r = traduzir(o["entrada"].asString.repeat(vezes)) { urls.add(it); resp("\"ok\",\"x\"") }
+            when (esp["tipo"].asString) {
+                "ok" -> {
+                    assertEquals(nome, Resultado.Traducao("ok"), r)
+                    assertEquals(nome, listOf(base + esp["q"].asString.repeat(vezes)), urls)
+                }
+                "grande_demais" -> {
+                    assertEquals(nome, Resultado.GrandeDemais(esp["n"].asInt), r)
+                    assertTrue(nome, urls.isEmpty())
+                }
+                "vazio" -> { assertEquals(nome, Resultado.Vazio, r); assertTrue(nome, urls.isEmpty()) }
+                "sem_letras" -> { assertEquals(nome, Resultado.SemLetras, r); assertTrue(nome, urls.isEmpty()) }
+                else -> error("tipo desconhecido: " + esp["tipo"])
+            }
         }
     }
 

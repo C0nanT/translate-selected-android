@@ -66,7 +66,13 @@ private fun motivoDe(e: Exception): String = when (e) {
 
 fun urlTraducao(texto: String): String =
     "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=$IDIOMA_DESTINO&dt=t&q=" +
-        URLEncoder.encode(texto, "UTF-8")
+        codificarQ(texto)
+
+// Regra unica de codificacao do q (igual a url_traducao em pc/nucleo.py): RFC 3986. Ficam
+// crus so A-Z a-z 0-9 - . _ ~ ; espaco vira +; todo o resto vira %XX em UTF-8.
+// URLEncoder diverge em ~ (poe %7E) e * (deixa cru): corrige os dois aqui, o Python e o padrao.
+private fun codificarQ(texto: String): String =
+    URLEncoder.encode(texto, "UTF-8").replace("*", "%2A").replace("%7E", "~")
 
 // data[0] = partes; concatena o primeiro elemento de cada uma, ignorando vazias
 private fun extrair(corpo: String): String {
