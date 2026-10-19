@@ -133,7 +133,7 @@ abstract class PopupActivity : Activity() {
         // popup fechado nao fica preso na memoria e o resultado e descartado.
         val ref = WeakReference(this)
         pedido = Requisicoes.executor.submit {
-            val r = traduzir(texto, busca::buscar)
+            val r = translate(texto, busca::buscar)
             Handler(Looper.getMainLooper()).post { ref.get()?.aplicar(r) }
         }
     }
@@ -142,14 +142,14 @@ abstract class PopupActivity : Activity() {
         if (avisaVazio) mostrar(aviso, erro = true) else finish()
     }
 
-    private fun aplicar(r: Resultado) {
+    private fun aplicar(r: Result) {
         if (isFinishing || isDestroyed) return
         when (r) {
-            is Resultado.Traducao -> mostrar(r.texto)
-            is Resultado.GrandeDemais -> mostrar("Texto grande demais (${r.n} caracteres)", erro = true)
-            Resultado.Vazio -> semTexto(NADA_COPIADO)
-            Resultado.SemLetras -> semTexto("Nada para traduzir")
-            is Resultado.Erro -> mostrar(r.motivo, erro = true)
+            is Result.Translation -> mostrar(r.text)
+            is Result.TooLarge -> mostrar("Texto grande demais (${r.n} caracteres)", erro = true)
+            Result.Empty -> semTexto(NADA_COPIADO)
+            Result.NoLetters -> semTexto("Nada para traduzir")
+            is Result.Failure -> mostrar(r.reason, erro = true)
         }
     }
 
