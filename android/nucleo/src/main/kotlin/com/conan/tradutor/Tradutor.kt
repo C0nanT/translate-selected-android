@@ -35,7 +35,7 @@ sealed class ErroRede : IOException() {
 // texto copiado de PDF traz \n em cada fim de linha (e hifen em palavra cortada);
 // o Google traduz cada linha solta e perde o contexto. Junta as linhas; linha em
 // branco continua separando paragrafos.
-// Copia em juntar_linhas de tradutor.py (PC): manter as duas iguais,
+// Copia em juntar_linhas de pc/nucleo.py: manter as duas iguais,
 // conferidas pelos casos compartilhados em casos/juntar_linhas.json.
 fun juntarLinhas(texto: String): String =
     texto.replace("\r\n", "\n")
