@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "tradutor"
-include(":app")
+include(":app", ":nucleo")
