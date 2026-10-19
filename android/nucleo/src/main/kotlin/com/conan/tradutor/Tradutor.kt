@@ -1,10 +1,6 @@
 package com.conan.tradutor
 
 import java.io.IOException
-import java.net.ConnectException
-import java.net.NoRouteToHostException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import java.net.URLEncoder
 
 // Kotlin puro (sem Android): a busca HTTP vem de fora, recebe a URL e devolve o corpo
@@ -17,8 +13,24 @@ sealed class Resultado {
     data class Erro(val motivo: String) : Resultado()
 }
 
-// busca lanca isto em resposta HTTP diferente de 200
-class ErroHttp(val codigo: Int) : IOException("HTTP $codigo")
+// Contrato entre o adaptador de rede e o nucleo (igual a ErroRede em pc/nucleo.py): a busca
+// lanca ErroRede; o adaptador converte as excecoes da plataforma (ver Rede.kt).
+// tipos: tempo_esgotado, sem_conexao, http (+ codigo), outro (+ detalhe).
+sealed class ErroRede : IOException() {
+    object TempoEsgotado : ErroRede()
+    object SemConexao : ErroRede()
+    class Http(val codigo: Int) : ErroRede()
+    class Outro(val detalhe: String) : ErroRede()
+
+    // unico lugar das mensagens de erro de rede
+    val mensagem: String
+        get() = when (this) {
+            TempoEsgotado -> "Tempo esgotado"
+            SemConexao -> "Sem conexão com a internet"
+            is Http -> "Erro do servidor (HTTP $codigo)"
+            is Outro -> detalhe
+        }
+}
 
 // texto copiado de PDF traz \n em cada fim de linha (e hifen em palavra cortada);
 // o Google traduz cada linha solta e perde o contexto. Junta as linhas; linha em
@@ -56,13 +68,9 @@ fun traduzir(bruto: String, buscar: (String) -> String): Resultado {
     }
 }
 
-// motivo legivel em pt-BR; caso desconhecido cai na mensagem da excecao
-private fun motivoDe(e: Exception): String = when (e) {
-    is ErroHttp -> "Erro do servidor (HTTP ${e.codigo})"
-    is SocketTimeoutException -> "Tempo esgotado"
-    is UnknownHostException, is ConnectException, is NoRouteToHostException -> "Sem conexão com a internet"
-    else -> e.message ?: e.javaClass.simpleName
-}
+// excecao fora do contrato (nao ErroRede) cai na mensagem dela, como "outro"
+private fun motivoDe(e: Exception): String =
+    if (e is ErroRede) e.mensagem else e.message ?: e.javaClass.simpleName
 
 fun urlTraducao(texto: String): String =
     "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=$IDIOMA_DESTINO&dt=t&q=" +
