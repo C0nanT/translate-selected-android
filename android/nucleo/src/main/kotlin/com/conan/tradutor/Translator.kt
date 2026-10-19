@@ -36,7 +36,7 @@ sealed class NetworkError : IOException() {
 // Google translates each loose line and loses context. Joins the lines; a blank
 // line still separates paragraphs.
 // Copy of join_lines in pc/nucleo.py: keep both equal,
-// checked by the shared cases in casos/join_lines.json.
+// checked by the shared cases in cases/join_lines.json.
 fun joinLines(text: String): String =
     text.replace("\r\n", "\n")
         .split(Regex("\n[ \t]*\n\\s*"))

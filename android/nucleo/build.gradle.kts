@@ -20,7 +20,7 @@ dependencies {
     testImplementation("com.google.code.gson:gson:2.10.1")
 }
 
-// os testes leem os casos compartilhados da raiz: mudar um caso invalida o cache do teste
+// os testes leem os cases compartilhados da raiz: mudar um caso invalida o cache do teste
 tasks.withType<Test>().configureEach {
     inputs.dir(rootProject.file("../cases")).withPropertyName("cases")
 }

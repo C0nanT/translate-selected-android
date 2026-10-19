@@ -8,10 +8,10 @@ import java.io.File
 
 class GoogleResponseTest {
     private fun caseFile(name: String) = generateSequence(File("").absoluteFile) { it.parentFile }
-        .map { File(it, "casos/$name") }
+        .map { File(it, "cases/$name") }
         .first { it.exists() }
 
-    // the cases live in casos/google_response.json (root) and also apply to the PC
+    // the cases live in cases/google_response.json (root) and also apply to the PC
     @Test fun sharedGoogleResponseCases() {
         val cases = JsonParser.parseString(caseFile("google_response.json").readText()).asJsonArray
         assertTrue(cases.size() > 0)

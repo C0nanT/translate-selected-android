@@ -77,10 +77,10 @@ class TranslatorTest {
     }
 
     private fun caseFile(name: String) = generateSequence(File("").absoluteFile) { it.parentFile }
-        .map { File(it, "casos/$name") }
+        .map { File(it, "cases/$name") }
         .first { it.exists() }
 
-    // the cases live in casos/join_lines.json (root) and also apply to the PC
+    // the cases live in cases/join_lines.json (root) and also apply to the PC
     @Test fun sharedJoinLinesCases() {
         val cases = JsonParser.parseString(caseFile("join_lines.json").readText()).asJsonArray
         assertTrue(cases.size() > 0)
@@ -94,7 +94,7 @@ class TranslatorTest {
         }
     }
 
-    // the cases live in casos/validation.json (root) and also apply to the PC
+    // the cases live in cases/validation.json (root) and also apply to the PC
     @Test fun sharedValidationCases() {
         val base = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q="
         val cases = JsonParser.parseString(caseFile("validation.json").readText()).asJsonArray
