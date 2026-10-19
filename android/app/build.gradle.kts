@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
+    testImplementation("com.google.code.gson:gson:2.10.1")
 }
 
 android {
@@ -26,4 +27,9 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+}
+
+// os testes leem os casos compartilhados da raiz: mudar um caso invalida o cache do teste
+tasks.withType<Test>().configureEach {
+    inputs.dir(rootProject.file("../casos")).withPropertyName("casos")
 }
