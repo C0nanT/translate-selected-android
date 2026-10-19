@@ -5,15 +5,19 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.Icon
 import android.provider.Settings
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
+import android.service.quicksettings.TileService
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
@@ -55,10 +59,11 @@ class BolhaService : Service() {
             nm.createNotificationChannel(NotificationChannel(CANAL, "Bolha", NotificationManager.IMPORTANCE_MIN))
             Notification.Builder(this, CANAL)
         } else @Suppress("DEPRECATION") Notification.Builder(this)
-        val n = b.setSmallIcon(android.R.drawable.ic_menu_edit)
+        val n = b.setSmallIcon(R.drawable.ic_traduzir)
             .setContentTitle("Bolha do Tradutor ligada")
             .setContentText("Toque para desligar")
             .setContentIntent(desligar)
+            .addAction(Notification.Action.Builder(Icon.createWithResource(this, R.drawable.ic_traduzir), "Desligar", desligar).build())
             .setOngoing(true)
             .build()
         if (Build.VERSION.SDK_INT >= 34) startForeground(1, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
@@ -124,6 +129,13 @@ class BolhaService : Service() {
         }
         wm.addView(v, lp)
         bolha = v
+        mudouEstado(true)
+    }
+
+    // bloco das Configuracoes rapidas acompanha o estado
+    private fun mudouEstado(l: Boolean) {
+        ligada = l
+        if (Build.VERSION.SDK_INT >= 24) TileService.requestListeningState(this, ComponentName(this, BolhaTile::class.java))
     }
 
     // posicao da bolha (lado x lado) sem sair da tela
@@ -142,10 +154,25 @@ class BolhaService : Service() {
     override fun onDestroy() {
         bolha?.let { wm.removeView(it) }
         bolha = null
+        mudouEstado(false)
         super.onDestroy()
     }
 
     companion object {
+        // bolha na tela agora (o processo morre junto com o servico, entao comeca falso)
+        var ligada = false
+            private set
+
+        // sem "Sobrepor a outros apps" o servico para sozinho: quem chama confere antes
+        fun ligar(ctx: Context) {
+            val i = Intent(ctx, BolhaService::class.java)
+            if (Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(i) else ctx.startService(i)
+        }
+
+        fun desligar(ctx: Context) {
+            ctx.stopService(Intent(ctx, BolhaService::class.java))
+        }
+
         const val ACAO_DESLIGAR = "com.conan.tradutor.DESLIGAR"
         private const val CANAL = "bolha"
         private const val PREFS = "bolha"  // ultima posicao (x, y do canto superior esquerdo)

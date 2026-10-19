@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 文 da bolha na area segura do icone adaptativo (108dp) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M51.13 37.99C52.23 39.78 53.4 42.22 53.84 43.72L56.87 42.73C56.36 41.24 55.08 38.86 53.98 37.11ZM37.51 43.79V46.5H43.21C45.36 52.05 48.25 56.83 52.01 60.74C47.99 64.1 43.06 66.58 37 68.3C37.55 68.95 38.42 70.23 38.72 70.89C44.82 68.92 49.89 66.29 54.02 62.71C58.15 66.36 63.11 69.06 69.1 70.71C69.58 69.94 70.38 68.77 71 68.19C65.16 66.73 60.19 64.13 56.14 60.7C59.82 56.94 62.64 52.27 64.76 46.5H70.53V43.79ZM54.09 58.8C50.66 55.33 47.96 51.17 46.06 46.5H61.65C59.82 51.43 57.31 55.48 54.09 58.8Z" />
+</vector>
