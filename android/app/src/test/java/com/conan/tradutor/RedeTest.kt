@@ -11,25 +11,25 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 class RedeTest {
-    @Test fun timeoutViraTempoEsgotado() {
-        assertSame(ErroRede.TempoEsgotado, converterExcecao(SocketTimeoutException("Read timed out")))
+    @Test fun timeoutBecomesTimeout() {
+        assertSame(NetworkError.Timeout, convertException(SocketTimeoutException("Read timed out")))
     }
 
-    @Test fun hostDesconhecidoRecusadaOuSemRotaViraSemConexao() {
+    @Test fun unknownHostRefusedOrNoRouteBecomesNoConnection() {
         for (e in listOf(UnknownHostException("x"), ConnectException("refused"), NoRouteToHostException("rota"))) {
-            assertSame(e.toString(), ErroRede.SemConexao, converterExcecao(e))
+            assertSame(e.toString(), NetworkError.NoConnection, convertException(e))
         }
     }
 
-    @Test fun erroRedeJaConvertidoPassaIntacto() {
-        val http = ErroRede.Http(503)
-        assertSame(http, converterExcecao(http))
+    @Test fun alreadyConvertedNetworkErrorPassesThrough() {
+        val http = NetworkError.Http(503)
+        assertSame(http, convertException(http))
     }
 
-    @Test fun restoViraOutroComDetalhe() {
-        val r = converterExcecao(IOException("boom"))
-        assertTrue(r is ErroRede.Outro)
-        assertEquals("boom", (r as ErroRede.Outro).detalhe)
-        assertEquals("IllegalStateException", (converterExcecao(IllegalStateException()) as ErroRede.Outro).detalhe)
+    @Test fun restBecomesOtherWithDetail() {
+        val r = convertException(IOException("boom"))
+        assertTrue(r is NetworkError.Other)
+        assertEquals("boom", (r as NetworkError.Other).detail)
+        assertEquals("IllegalStateException", (convertException(IllegalStateException()) as NetworkError.Other).detail)
     }
 }

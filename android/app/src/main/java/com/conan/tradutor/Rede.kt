@@ -8,15 +8,15 @@ import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.UnknownHostException
 
-// Converte excecoes de HttpURLConnection/java.net para o tipo comum ErroRede do nucleo.
-fun converterExcecao(e: Exception): ErroRede = when (e) {
-    is ErroRede -> e
-    is SocketTimeoutException -> ErroRede.TempoEsgotado
-    is UnknownHostException, is ConnectException, is NoRouteToHostException -> ErroRede.SemConexao
-    else -> ErroRede.Outro(e.message ?: e.javaClass.simpleName)
+// Converts HttpURLConnection/java.net exceptions to the common NetworkError type of the core.
+fun convertException(e: Exception): NetworkError = when (e) {
+    is NetworkError -> e
+    is SocketTimeoutException -> NetworkError.Timeout
+    is UnknownHostException, is ConnectException, is NoRouteToHostException -> NetworkError.NoConnection
+    else -> NetworkError.Other(e.message ?: e.javaClass.simpleName)
 }
 
-// busca HTTP real injetada no nucleo; qualquer falha sai como ErroRede (Http em nao-200).
+// busca HTTP real injetada no nucleo; qualquer falha sai como NetworkError (Http em nao-200).
 // HttpURLConnection ignora interrupt de thread: cancelar() desconecta a conexao em curso
 // para a leitura falhar na hora e a thread unica do executor ficar livre.
 class BuscaHttp {
@@ -32,10 +32,10 @@ class BuscaHttp {
             c.connectTimeout = 10_000
             c.readTimeout = 10_000
             c.setRequestProperty("User-Agent", "Mozilla/5.0")
-            if (c.responseCode != 200) throw ErroRede.Http(c.responseCode)
+            if (c.responseCode != 200) throw NetworkError.Http(c.responseCode)
             return c.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
         } catch (e: Exception) {
-            throw converterExcecao(e)
+            throw convertException(e)
         } finally {
             c.disconnect()
         }
