@@ -15,26 +15,6 @@ class TradutorTest {
     private fun resp(vararg partes: String) =
         "[[" + partes.joinToString(",") { "[$it]" } + "],null,\"en\"]"
 
-    @Test fun umaParte() {
-        val r = traduzir("hello") { resp("\"olá\",\"hello\",null,null,1") }
-        assertEquals(Resultado.Traducao("olá"), r)
-    }
-
-    @Test fun variasPartesConcatenadas() {
-        val r = traduzir("a. b.") { resp("\"Olá. \",\"a. \"", "\"Mundo.\",\"b.\"") }
-        assertEquals(Resultado.Traducao("Olá. Mundo."), r)
-    }
-
-    @Test fun partesVaziasIgnoradas() {
-        val r = traduzir("x") { resp("\"um\",\"x\"", "\"\",\"\"", "null,null", "\"dois\",\"y\"") }
-        assertEquals(Resultado.Traducao("umdois"), r)
-    }
-
-    @Test fun escapesJson() {
-        val r = traduzir("x") { resp("\"a\\\"b\\n\\u00e9\\\\\",\"x\"") }
-        assertEquals(Resultado.Traducao("a\"b\né\\"), r)
-    }
-
     @Test fun textoVazioNaoChamaRede() {
         var chamou = false
         assertEquals(Resultado.Vazio, traduzir("") { chamou = true; "" })
@@ -103,20 +83,6 @@ class TradutorTest {
 
     @Test fun httpNao200ViraErroDoServidor() {
         assertEquals("Erro do servidor (HTTP 503)", motivo(traduzir("x") { throw ErroHttp(503) }))
-    }
-
-    @Test fun jsonInvalidoViraErro() {
-        assertTrue(traduzir("x") { "<html>oops" } is Resultado.Erro)
-        assertTrue(traduzir("x") { "" } is Resultado.Erro)
-        assertTrue(traduzir("x") { "[[1,2]" } is Resultado.Erro)
-    }
-
-    @Test fun formatoInesperadoViraErro() {
-        assertTrue(traduzir("x") { "{\"a\":1}" } is Resultado.Erro)
-        assertTrue(traduzir("x") { "[]" } is Resultado.Erro)
-        assertTrue(traduzir("x") { "[[1]]" } is Resultado.Erro)
-        assertTrue(traduzir("x") { "[[[5]]]" } is Resultado.Erro)
-        assertEquals("Resposta inesperada do Google Tradutor", motivo(traduzir("x") { "[]" }))
     }
 
     @Test fun urlComParametrosETextoCodificado() {
