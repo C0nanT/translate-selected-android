@@ -1,0 +1,7 @@
+[
+  {"name": "timeout", "failure": {"type": "timeout"}, "expected": "Tempo esgotado"},
+  {"name": "no connection", "failure": {"type": "no_connection"}, "expected": "Sem conexão com a internet"},
+  {"name": "HTTP 503", "failure": {"type": "http", "code": 503}, "expected": "Erro do servidor (HTTP 503)"},
+  {"name": "HTTP 429", "failure": {"type": "http", "code": 429}, "expected": "Erro do servidor (HTTP 429)"},
+  {"name": "other shows the detail", "failure": {"type": "other", "detail": "boom"}, "expected": "boom"}
+]
