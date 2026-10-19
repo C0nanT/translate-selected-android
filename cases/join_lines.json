@@ -1,0 +1,27 @@
+[
+  {
+    "name": "simple break becomes a space",
+    "input": "has a whole\nhost of advantages",
+    "expected": "has a whole host of advantages"
+  },
+  {
+    "name": "hyphen at end of line joins the word",
+    "input": "associated with dis-\ntributed systems",
+    "expected": "associated with distributed systems"
+  },
+  {
+    "name": "hyphen before a capital letter stays",
+    "input": "Monolith-\nTo",
+    "expected": "Monolith-To"
+  },
+  {
+    "name": "blank line separates paragraphs",
+    "input": "one\ntwo\n\n\nthree",
+    "expected": "one two\n\nthree"
+  },
+  {
+    "name": "CRLF and spaces at the break",
+    "input": "a  \r\n  b\r\nc",
+    "expected": "a b c"
+  }
+]

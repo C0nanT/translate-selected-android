@@ -4,15 +4,16 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":core"))
     testImplementation("junit:junit:4.13.2")
 }
 
 android {
-    namespace = "com.conan.tradutor"
+    namespace = "com.conan.translator"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.conan.tradutor"
+        applicationId = "com.conan.translator"
         minSdk = 23
         targetSdk = 34
         versionCode = 1

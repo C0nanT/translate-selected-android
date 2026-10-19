@@ -1,0 +1,15 @@
+[
+  {"name": "empty text", "input": "", "expected": {"type": "empty"}},
+  {"name": "only spaces and breaks", "input": "  \n \r\n\t ", "expected": {"type": "empty"}},
+  {"name": "only a number", "input": "42", "expected": {"type": "no_letters"}},
+  {"name": "only punctuation and symbols", "input": "3,14 % + 7 —", "expected": {"type": "no_letters"}},
+  {"name": "one letter is enough", "input": "42 a", "expected": {"type": "ok", "q": "42+a"}},
+  {"name": "accents, space and reserved symbols", "input": "olá mundo&x=1", "expected": {"type": "ok", "q": "ol%C3%A1+mundo%26x%3D1"}},
+  {"name": "tilde stays raw and asterisk becomes %2A", "input": "a~b*c", "expected": {"type": "ok", "q": "a~b%2Ac"}},
+  {"name": "hyphen, dot and underscore stay raw", "input": "a-b.c_d", "expected": {"type": "ok", "q": "a-b.c_d"}},
+  {"name": "PDF lines are joined before sending", "input": "dis-\ntributed\nsystems", "expected": {"type": "ok", "q": "distributed+systems"}},
+  {"name": "3000 characters still translates", "input": "a", "times": 3000, "expected": {"type": "ok", "q": "a"}},
+  {"name": "3001 characters is too large", "input": "a", "times": 3001, "expected": {"type": "too_large", "n": 3001}},
+  {"name": "emoji counts 1 (code point), not 2 or 4", "input": "a😀", "times": 1501, "expected": {"type": "too_large", "n": 3002}},
+  {"name": "URL too long with under 3000 characters", "input": "é", "times": 3000, "expected": {"type": "too_large", "n": 3000}}
+]
