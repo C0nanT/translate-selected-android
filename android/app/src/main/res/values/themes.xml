@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- popup claro; values-night troca para escuro (segue o tema do sistema) -->
+    <!-- light popup; values-night switches to dark (follows the system theme) -->
     <style name="Popup" parent="android:Theme.DeviceDefault.Light.Dialog.NoActionBar">
         <item name="android:windowCloseOnTouchOutside">true</item>
         <item name="android:backgroundDimEnabled">false</item>

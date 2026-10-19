@@ -2,11 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- bolha: desenhar por cima dos outros apps, em primeiro plano -->
+    <!-- bubble: draw over other apps, in the foreground -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <!-- Android 13+: sem isto o pedido de MainActivity nao faz nada e a notificacao "Toque para desligar" nao aparece -->
+    <!-- Android 13+: without this the MainActivity request does nothing and the "Toque para desligar" notification does not show -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -15,8 +15,8 @@
         android:label="Tradutor"
         android:supportsRtl="true">
 
-        <!-- item "Traduzir pt-BR" no menu da selecao de texto. o rotulo e fixo aqui:
-             se mudar IDIOMA_DESTINO (Config.kt), trocar tambem o android:label -->
+        <!-- "Traduzir pt-BR" item in the text selection menu. the label is fixed here:
+             if TARGET_LANGUAGE (core/.../Limits.kt) changes, change android:label too -->
         <activity
             android:name=".ProcessTextActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode"
@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
 
-        <!-- icone do app: liga/desliga a bolha -->
+        <!-- app icon: turns the bubble on/off -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -44,7 +44,7 @@
             </intent-filter>
         </activity>
 
-        <!-- toque na bolha: traduz o que foi copiado -->
+        <!-- tap on the bubble: translates what was copied -->
         <activity
             android:name=".ClipboardActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode"
@@ -54,7 +54,7 @@
             android:theme="@style/Popup" />
 
         <service
-            android:name=".BolhaService"
+            android:name=".BubbleService"
             android:exported="false"
             android:foregroundServiceType="specialUse">
             <property
@@ -62,11 +62,11 @@
                 android:value="bolha flutuante que traduz o texto copiado" />
         </service>
 
-        <!-- bloco nas Configuracoes rapidas (Android 7+): liga/desliga a bolha -->
+        <!-- Quick Settings tile (Android 7+): turns the bubble on/off -->
         <service
-            android:name=".BolhaTile"
+            android:name=".BubbleTile"
             android:exported="true"
-            android:icon="@drawable/ic_traduzir"
+            android:icon="@drawable/ic_translate"
             android:label="Tradutor"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
