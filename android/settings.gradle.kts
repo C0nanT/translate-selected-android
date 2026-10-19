@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "tradutor"
-include(":app", ":nucleo")
+rootProject.name = "translator"
+include(":app", ":core")

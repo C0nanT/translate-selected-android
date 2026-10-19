@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 6/7: a bolha (circulo azul + 文) -->
+<!-- Android 6/7: the bubble (blue circle + 文) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="48dp" android:height="48dp"
     android:viewportWidth="48" android:viewportHeight="48">
-    <path android:fillColor="@color/bolha" android:pathData="M24,2A22,22 0,1 1,24 46A22,22 0,1 1,24 2Z" />
+    <path android:fillColor="@color/bubble" android:pathData="M24,2A22,22 0,1 1,24 46A22,22 0,1 1,24 2Z" />
     <path android:fillColor="#FFFFFFFF" android:pathData="M22.15 13.64C22.85 14.8 23.61 16.38 23.89 17.35L25.85 16.71C25.52 15.74 24.7 14.21 23.99 13.07ZM13.33 17.4V19.14H17.02C18.41 22.74 20.28 25.83 22.71 28.36C20.11 30.53 16.92 32.14 13 33.25C13.35 33.68 13.92 34.5 14.11 34.93C18.06 33.65 21.34 31.95 24.01 29.64C26.68 32 29.9 33.75 33.77 34.81C34.08 34.31 34.6 33.56 35 33.18C31.22 32.24 28.01 30.56 25.38 28.34C27.77 25.9 29.59 22.88 30.96 19.14H34.69V17.4ZM24.06 27.11C21.84 24.86 20.09 22.17 18.86 19.14H28.95C27.77 22.33 26.14 24.96 24.06 27.11Z" />
 </vector>
