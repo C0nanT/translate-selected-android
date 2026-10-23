@@ -28,15 +28,7 @@ The APK is at `app/build/outputs/apk/debug/app-debug.apk`. To install it by hand
 
 ## Download on the phone (GitHub Releases)
 
-Each tag `v*` pushed to GitHub runs `.github/workflows/release.yml`: tests, signed release APK, and a [Release](https://github.com/C0nanT/translate-selected-android/releases) with the `.apk` attached.
-
-```bash
-git tag v0.2.0 && git push origin v0.2.0
-```
-
-On the phone, open the Releases page, download `translate-selected-vX.Y.Z.apk` and install it (allow installing from unknown sources for the browser). New versions install over the old one.
-
-The release key is in the repo secrets `KEYSTORE_BASE64` and `KEYSTORE_PASSWORD` (alias `release`); the original stays outside the repo, in `~/.android-keys/`. Losing it means the next APKs no longer update the installed app (you have to uninstall first). The debug APK from `make android` uses another key: switching between it and the Releases one also needs an uninstall.
+Each tag `v*` pushed to GitHub builds a signed APK and publishes it on [Releases](https://github.com/C0nanT/translate-selected-android/releases); open that page on the phone, download and install. How it works, how to release a version, the signing key and troubleshooting: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Bubble
 
