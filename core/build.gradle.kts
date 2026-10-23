@@ -22,5 +22,5 @@ dependencies {
 
 // the tests read the shared cases from the repo root: changing a case invalidates the test cache
 tasks.withType<Test>().configureEach {
-    inputs.dir(rootProject.file("../cases")).withPropertyName("cases")
+    inputs.dir(rootProject.file("cases")).withPropertyName("cases")
 }
