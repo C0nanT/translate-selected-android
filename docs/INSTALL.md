@@ -5,6 +5,10 @@ O app não está na Play Store: você baixa o arquivo `.apk` e instala direto. L
 **Link de download (sempre a versão mais nova):**
 https://github.com/C0nanT/translate-selected-android/releases/latest/download/translate-selected.apk
 
+Ou aponte a câmera do celular para o QR code:
+
+<img src="download-qr.svg" alt="QR code para baixar o APK" width="200">
+
 Requisito: Android 6 ou mais novo.
 
 ## 1. Baixar
