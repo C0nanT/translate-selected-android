@@ -22,6 +22,12 @@ Made for reading English books on a mobile device and only checking the translat
 
 How it works: copy the text and tap the floating bubble **文**. It works in any reader, including the Files by Google PDF viewer.
 
+<p align="center">
+  <img src="docs/demo.gif" alt="Demo: select text, tap the bubble, read the pt-BR translation in a popup" width="300">
+</p>
+
+<sub>Illustrative animation (generated, not a screen recording).</sub>
+
 Tested on a Lenovo TB336FU tablet with Android 16, reading a PDF in Files by Google.
 
 ## Requirements
