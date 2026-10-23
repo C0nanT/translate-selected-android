@@ -1,0 +1,44 @@
+# Push a tag v* (e.g. v0.2.0) -> runs the tests, builds the signed release APK
+# and attaches it to a GitHub Release, ready to download on the phone.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Tests
+        run: ./gradlew :core:test :app:testDebugUnitTest
+
+      - name: Build signed APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          test -n "$KEYSTORE_BASE64" || { echo "missing secret KEYSTORE_BASE64" >&2; exit 1; }
+          export KEYSTORE_PATH="$RUNNER_TEMP/release.jks"
+          echo "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_PATH"
+          export VERSION_NAME="${GITHUB_REF_NAME#v}"
+          ./gradlew assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk "translate-selected-$GITHUB_REF_NAME.apk"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: translate-selected-*.apk
+          generate_release_notes: true

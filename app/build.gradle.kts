@@ -16,8 +16,27 @@ android {
         applicationId = "com.conan.translator"
         minSdk = 23
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1"
+        // CI passes these from the tag (v1.2.3) and the run number; local builds keep the defaults
+        versionCode = System.getenv("VERSION_CODE")?.toInt() ?: 1
+        versionName = System.getenv("VERSION_NAME") ?: "0.1"
+    }
+
+    // release key comes from the environment (GitHub secrets in CI); without it, release is left unsigned
+    val keystore = System.getenv("KEYSTORE_PATH")
+    signingConfigs {
+        if (keystore != null) {
+            create("release") {
+                storeFile = file(keystore)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS") ?: "release"
+                keyPassword = System.getenv("KEYSTORE_PASSWORD")
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (keystore != null) signingConfig = signingConfigs.getByName("release")
+        }
     }
 
     compileOptions {

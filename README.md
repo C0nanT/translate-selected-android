@@ -26,6 +26,18 @@ make android-apk  # only builds the APK
 
 The APK is at `app/build/outputs/apk/debug/app-debug.apk`. To install it by hand, copy the file to the tablet, open it in the file manager and allow installing from unknown sources.
 
+## Download on the phone (GitHub Releases)
+
+Each tag `v*` pushed to GitHub runs `.github/workflows/release.yml`: tests, signed release APK, and a [Release](https://github.com/C0nanT/translate-selected-android/releases) with the `.apk` attached.
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+On the phone, open the Releases page, download `translate-selected-vX.Y.Z.apk` and install it (allow installing from unknown sources for the browser). New versions install over the old one.
+
+The release key is in the repo secrets `KEYSTORE_BASE64` and `KEYSTORE_PASSWORD` (alias `release`); the original stays outside the repo, in `~/.android-keys/`. Losing it means the next APKs no longer update the installed app (you have to uninstall first). The debug APK from `make android` uses another key: switching between it and the Releases one also needs an uninstall.
+
 ## Bubble
 
 - Turn on: tap the **Tradutor** icon in the app list. The first time, it opens the "Sobrepor a outros apps" screen: enable it for Tradutor and tap the icon again
