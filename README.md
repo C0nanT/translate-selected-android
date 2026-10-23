@@ -1,17 +1,28 @@
+<p align="center">
+  <img src="docs/banner.png" alt="Translate Selected: copy text, see the pt-BR translation in a popup over any app" width="100%">
+</p>
+
 # translate-selected-android
+
+## Download
+
+**Latest version:** https://github.com/C0nanT/translate-selected-android/releases/latest/download/translate-selected.apk
+
+<img src="docs/download-qr.svg" alt="QR code: download the latest APK" width="200">
+
+Scan with your phone camera to download. Step-by-step install guide (pt-BR, including the Play Protect warning): [docs/INSTALL.md](docs/INSTALL.md).
+
+## About
 
 Android (Kotlin) version of [translate-selected](https://github.com/C0nanT/translate-selected): copy text in any app (PDF reader, browser, etc.) and see the pt-BR translation in a popup at the bottom of the screen, over the app.
 
-Made for reading English books on a tablet and only checking the translation when you get stuck on a sentence.
+Made for reading English books on a mobile device and only checking the translation when you get stuck on a sentence.
 
 **Desktop (Linux/X11, Python + GTK):** https://github.com/C0nanT/translate-selected
 
-Two ways to translate; both open the same popup at the bottom of the screen, over the app:
+How it works: copy the text and tap the floating bubble **文**. It works in any reader, including the Files by Google PDF viewer.
 
-- **Floating bubble** (works in any reader, including the Files by Google PDF viewer): copy the text and tap the bubble **文**.
-- **"Traduzir pt-BR" item** in the selection menu, in apps that show items from other apps in that menu.
-
-Tested on a Lenovo TB336FU with Android 16, reading a PDF in Files by Google.
+Tested on a Lenovo TB336FU tablet with Android 16, reading a PDF in Files by Google.
 
 ## Requirements
 
@@ -20,21 +31,13 @@ Tested on a Lenovo TB336FU with Android 16, reading a PDF in Files by Google.
 - Android SDK at `~/Android/Sdk` (or `ANDROID_HOME`) and Java 17+
 
 ```bash
-make android      # builds the debug APK and installs it on the tablet via USB
+make android      # builds the debug APK and installs it on the device via USB
 make android-apk  # only builds the APK
 ```
 
-The APK is at `app/build/outputs/apk/debug/app-debug.apk`. To install it by hand, copy the file to the tablet, open it in the file manager and allow installing from unknown sources.
+The APK is at `app/build/outputs/apk/debug/app-debug.apk`. To install it by hand, copy the file to the device, open it in the file manager and allow installing from unknown sources.
 
-## Download on the phone (GitHub Releases)
-
-**Download (latest version):** https://github.com/C0nanT/translate-selected-android/releases/latest/download/translate-selected.apk
-
-<img src="docs/download-qr.svg" alt="QR code: download the latest APK" width="200">
-
-Scan with the phone camera to download.
-
-Step-by-step install guide for phone users (pt-BR, including the Play Protect warning): [docs/INSTALL.md](docs/INSTALL.md).
+## Releases
 
 Each tag `v*` pushed to GitHub builds a signed APK and publishes it on [Releases](https://github.com/C0nanT/translate-selected-android/releases). How it works, how to release a version, the signing key and troubleshooting: [docs/DEPLOY.md](docs/DEPLOY.md).
 
@@ -45,20 +48,18 @@ Each tag `v*` pushed to GitHub builds a signed APK and publishes it on [Releases
 - Turn off: hold your finger still on the bubble until it vibrates, or tap the "Bolha do Tradutor ligada" notification
 - Short tap translates; drag the bubble to move it (past the system touch slop, it neither translates nor turns off)
 - The bubble remembers where it was left: when turned on again it returns to the last place, adjusted to the screen (also after rotating or switching devices)
-- After the tablet restarts, the bubble does not come back on its own: tap the icon again
+- After the device restarts, the bubble does not come back on its own: tap the icon again
 - Android shows "Tradutor colou da área de transferência" on every translation; this is expected
 
 ## Usage
 
-- Copy the text and tap the bubble (or select and tap "Traduzir pt-BR" in the menu) -> "Traduzindo…" appears, then the translation
+- Copy the text and tap the bubble -> "Traduzindo…" appears, then the translation
 - Hides by itself in 15 s; the bar at the bottom shows the remaining time
 - Holding a finger on the popup pauses the time
 - Hold still until it vibrates, then drag to move the popup; the next ones open there (dragging without holding scrolls the text)
 - Tap outside -> the popup closes
 - Request failure -> red popup with the reason
 - Text over 3000 characters -> "Texto grande demais (N caracteres)" warning
-
-**PDF readers:** the Files by Google PDF viewer has its own selection menu (only "Copiar" and "Selecionar tudo"), so "Traduzir pt-BR" does not appear there: use the bubble. In the browser the item also did not appear in the first test; not investigated yet.
 
 ## Configuration
 
@@ -71,16 +72,16 @@ Constants in `app/src/main/java/com/conan/translator/Config.kt` (`HIDE_AFTER_S`,
 | `MAX_URL` | 8000 | cap on the already-encoded URL (accents and emoji inflate it); above it, shows the same warning. Conservative value, not yet measured on the device |
 | `POPUP_CHARS` | 80 | maximum popup width, in characters |
 
-Warnings in the red popup when tapping the bubble: "Nada copiado" (clipboard empty, holding an image/file, or reading blocked) and "Nada para traduzir" (text with no letters, such as "42"; no request is made). From the "Traduzir pt-BR" menu, these cases close without showing anything.
+Warnings in the red popup when tapping the bubble: "Nada copiado" (clipboard empty, holding an image/file, or reading blocked) and "Nada para traduzir" (text with no letters, such as "42"; no request is made).
 
 After changing these, run `make android`.
 
-**Privacy:** text is only sent to Google Translate when you tap the bubble or "Traduzir pt-BR", not on every selection or copy.
+**Privacy:** text is only sent to Google Translate when you tap the bubble, not on every selection or copy.
 
 ## Development
 
 - **Core**: pure rules, no UI and no network, in `core/` (Kotlin, a Gradle module without Android; importing `android.*` there fails the build on purpose).
-- **App**: what is specific to Android, in `app/` (bubble, popup, Quick Settings tile, selection menu and HTTP).
+- **App**: what is specific to Android, in `app/` (bubble, popup, Quick Settings tile and HTTP).
 - **`cases/`**: JSON files with input -> expected output, read by the core tests. They are the single source of truth for behavior.
 
 **Rule: when behavior changes, change the case first.** Write or adjust the case in `cases/` and only then the code. The stopwatch and position clamping do not use `cases/`: they have direct tests.
