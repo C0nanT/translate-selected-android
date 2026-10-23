@@ -26,8 +26,9 @@ Workflow: [`.github/workflows/release.yml`](../.github/workflows/release.yml). I
    | `KEYSTORE_PASSWORD` | secret | store and key password |
    | `KEY_ALIAS` | not set -> `release` | key alias |
 
-4. Copies the APK to `translate-selected-vX.Y.Z.apk` and creates the Release with it attached and
-   notes generated from the commits since the previous tag.
+4. Attaches the APK twice to a new Release (notes generated from the commits since the previous tag):
+   `translate-selected-vX.Y.Z.apk` (versioned) and `translate-selected.apk` (fixed name, so
+   `releases/latest/download/translate-selected.apk` always serves the newest version).
 
 Local builds (`make android`, `make android-apk`) do not use any of this: they produce the
 debug APK, versioned `0.1` / `1`, signed with the machine's debug key.
@@ -54,11 +55,15 @@ release notes readable.
 
 ## Installing on the phone
 
-1. Open https://github.com/C0nanT/translate-selected-android/releases on the phone.
-2. Download `translate-selected-vX.Y.Z.apk` from the latest release.
+End-user guide in pt-BR: [INSTALL.md](INSTALL.md). Short version:
+
+1. Open https://github.com/C0nanT/translate-selected-android/releases/latest/download/translate-selected.apk on the phone.
+2. The download starts right away.
 3. Open the file. The first time, Android asks to allow installing from unknown sources for the
    browser/file manager: allow it and go back.
-4. Install. Newer versions install over the old one, keeping the settings (bubble position).
+4. Play Protect warns about an unknown app: tap **More details** -> **Install anyway**. The big button
+   rejects the install and Android then only says "App not installed".
+5. Newer versions install over the old one, keeping the settings (bubble position).
 
 **Once:** an app installed with `make android` (debug key) has a different signature. Uninstall it
 before installing the first APK from Releases; the same is true to go back.
@@ -90,6 +95,7 @@ update signed by another key.
 |---|---|
 | Workflow fails with `missing secret KEYSTORE_BASE64` | secrets not set: run `scripts/setup-signing.sh` |
 | Tests fail in CI | fix, commit, then move the tag (below) |
+| "App not installed" right after the Play Protect dialog | the dialog's main button rejects: use **More details -> Install anyway** |
 | "App not installed" / "conflicts with an existing package" | installed app was signed with another key (debug or old key): uninstall it first |
 | Android refuses as a downgrade | the installed `versionCode` is higher: uninstall, or release a new tag (`run_number` always grows) |
 | Wrong tag, or the release must be redone | `gh release delete vX.Y.Z --cleanup-tag -y`, then tag and push again |

@@ -28,7 +28,11 @@ The APK is at `app/build/outputs/apk/debug/app-debug.apk`. To install it by hand
 
 ## Download on the phone (GitHub Releases)
 
-Each tag `v*` pushed to GitHub builds a signed APK and publishes it on [Releases](https://github.com/C0nanT/translate-selected-android/releases); open that page on the phone, download and install. How it works, how to release a version, the signing key and troubleshooting: [docs/DEPLOY.md](docs/DEPLOY.md).
+**Download (latest version):** https://github.com/C0nanT/translate-selected-android/releases/latest/download/translate-selected.apk
+
+Step-by-step install guide for phone users (pt-BR, including the Play Protect warning): [docs/INSTALL.md](docs/INSTALL.md).
+
+Each tag `v*` pushed to GitHub builds a signed APK and publishes it on [Releases](https://github.com/C0nanT/translate-selected-android/releases). How it works, how to release a version, the signing key and troubleshooting: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Bubble
 

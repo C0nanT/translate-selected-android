@@ -37,8 +37,12 @@ jobs:
           export VERSION_NAME="${GITHUB_REF_NAME#v}"
           ./gradlew assembleRelease
           cp app/build/outputs/apk/release/app-release.apk "translate-selected-$GITHUB_REF_NAME.apk"
+          # fixed name: releases/latest/download/translate-selected.apk always points to the newest version
+          cp app/build/outputs/apk/release/app-release.apk translate-selected.apk
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: translate-selected-*.apk
+          files: |
+            translate-selected-*.apk
+            translate-selected.apk
           generate_release_notes: true
