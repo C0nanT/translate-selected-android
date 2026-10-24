@@ -17,7 +17,7 @@ kotlin {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
-    testImplementation("com.google.code.gson:gson:2.10.1")
+    testImplementation("com.google.code.gson:gson:2.14.0")
 }
 
 // the tests read the shared cases from the repo root: changing a case invalidates the test cache
