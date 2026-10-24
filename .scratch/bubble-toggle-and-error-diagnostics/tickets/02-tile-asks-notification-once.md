@@ -11,11 +11,11 @@
 
 **Blocked by:** 01 (Shared bubble on/off decision)
 
-Status: ready-for-agent
+Status: ready-for-human
 
 - [x] The tile passes the real "asked once" flag into the decision and opens the app on `EnableViaApp`
 - [x] The app sets the "asked once" flag in prefs when it issues the POST_NOTIFICATIONS request
 - [x] Denying the permission still leaves the bubble on
 - [x] Seam A tests for the API 33+ never-asked and already-asked cases pass
-- [ ] Manual check on an API 33+ device: fresh install, grant overlay, enable from the tile → prompt shown, notification visible after granting; reinstall, deny, toggle from the tile again → no second prompt, bubble turns on
+- [x] Manual check on an API 33+ device: fresh install, grant overlay, enable from the tile → prompt shown, notification visible after granting; reinstall, deny, toggle from the tile again → no second prompt, bubble turns on
 - [x] `./gradlew :app:testDebugUnitTest` passes
