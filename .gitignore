@@ -4,3 +4,13 @@ local.properties
 build/
 .idea/
 *.iml
+.claude/
+.DS_Store
+*.apk
+*.aab
+*.jks
+*.keystore
+.env
+captures/
+.cxx/
+.externalNativeBuild/
