@@ -36,6 +36,7 @@ class MainActivity : Activity() {
                 // Android 13+: asks for the "Toque para desligar" notification; denying it does not block the bubble
                 if (action == ToggleAction.EnableViaApp) {
                     requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+                    NotificationAsk.markAsked(this)
                     awaitingPermission = true
                 }
                 BubbleService.enable(this)
