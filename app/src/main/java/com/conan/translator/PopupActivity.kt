@@ -32,7 +32,7 @@ import kotlin.math.abs
 // error: red background with the reason (same as on Linux).
 // each entry point (selection, share...) only says where the text comes from.
 //
-// Every entry point declared in AndroidManifest needs:
+// Every entry point declared in AndroidManifest needs (enforced by PopupManifestContractTest):
 //  - android:theme="@style/Popup" (translucent window, tapping outside closes)
 //  - android:configChanges with orientation|screenSize|smallestScreenSize|screenLayout|
 //    keyboard|keyboardHidden|navigation and uiMode: rotating or switching light/dark does not

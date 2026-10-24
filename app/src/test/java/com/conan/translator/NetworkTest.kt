@@ -7,8 +7,10 @@ import org.junit.Test
 import java.io.IOException
 import java.net.ConnectException
 import java.net.NoRouteToHostException
+import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import javax.net.ssl.SSLHandshakeException
 
 class NetworkTest {
     @Test fun timeoutBecomesTimeout() {
@@ -19,6 +21,14 @@ class NetworkTest {
         for (e in listOf(UnknownHostException("x"), ConnectException("refused"), NoRouteToHostException("route"))) {
             assertSame(e.toString(), NetworkError.NoConnection, convertException(e))
         }
+    }
+
+    @Test fun tlsHandshakeFailureBecomesNoConnection() {
+        assertSame(NetworkError.NoConnection, convertException(SSLHandshakeException("handshake failed")))
+    }
+
+    @Test fun connectionResetBecomesNoConnection() {
+        assertSame(NetworkError.NoConnection, convertException(SocketException("Connection reset")))
     }
 
     @Test fun alreadyConvertedNetworkErrorPassesThrough() {

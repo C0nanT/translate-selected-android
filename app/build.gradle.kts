@@ -8,6 +8,11 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
 }
 
+// the contract test reads the real manifest: changing it invalidates the test cache
+tasks.withType<Test>().configureEach {
+    inputs.file(file("src/main/AndroidManifest.xml")).withPropertyName("manifest")
+}
+
 android {
     namespace = "com.conan.translator"
     compileSdk = 34
