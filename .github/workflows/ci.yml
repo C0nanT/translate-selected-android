@@ -1,0 +1,32 @@
+# Runs the unit tests on pull requests and on pushes to main, so a failing change is visible before and after it merges.
+# The release workflow (release.yml) still runs the same tests again when a v* tag is pushed.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# a newer push to a PR cancels the run still in progress; runs on main always finish
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Tests
+        run: ./gradlew :core:test :app:testDebugUnitTest
