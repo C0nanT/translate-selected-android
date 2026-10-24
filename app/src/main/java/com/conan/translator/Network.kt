@@ -1,18 +1,22 @@
 package com.conan.translator
 
+import android.util.Log
 import java.io.IOException
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.NoRouteToHostException
+import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.UnknownHostException
+import javax.net.ssl.SSLException
 
 // Converts HttpURLConnection/java.net exceptions to the common NetworkError type of the core.
 fun convertException(e: Exception): NetworkError = when (e) {
     is NetworkError -> e
     is SocketTimeoutException -> NetworkError.Timeout
     is UnknownHostException, is ConnectException, is NoRouteToHostException -> NetworkError.NoConnection
+    is SSLException, is SocketException -> NetworkError.NoConnection  // TLS handshake, connection reset
     else -> NetworkError.Other(e.message ?: e.javaClass.simpleName)
 }
 
@@ -35,6 +39,7 @@ class HttpFetcher {
             if (c.responseCode != 200) throw NetworkError.Http(c.responseCode)
             return c.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
         } catch (e: Exception) {
+            Log.w(LOG_TAG, "fetch failed: $url", e)
             throw convertException(e)
         } finally {
             c.disconnect()
