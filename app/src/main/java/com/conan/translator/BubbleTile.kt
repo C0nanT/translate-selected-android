@@ -1,11 +1,9 @@
 package com.conan.translator
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import android.service.quicksettings.Tile
@@ -23,8 +21,7 @@ class BubbleTile : TileService() {
             enabled = BubbleService.enabled,
             canDrawOverlays = Settings.canDrawOverlays(this),
             sdk = Build.VERSION.SDK_INT,
-            notificationGranted = Build.VERSION.SDK_INT >= 33 &&
-                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED,
+            notificationGranted = NotificationAsk.isGranted(this),
             notificationAsked = NotificationAsk.wasAsked(this),
         )
         when (action) {

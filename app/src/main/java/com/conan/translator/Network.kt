@@ -39,7 +39,7 @@ class HttpFetcher {
             if (c.responseCode != 200) throw NetworkError.Http(c.responseCode)
             return c.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
         } catch (e: Exception) {
-            Log.w(LOG_TAG, "fetch failed: $url", e)
+            Log.w(LOG_TAG, "fetch failed", e)
             throw convertException(e)
         } finally {
             c.disconnect()
