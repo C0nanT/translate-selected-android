@@ -1,9 +1,11 @@
 package com.conan.translator
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import android.service.quicksettings.Tile
@@ -16,18 +18,19 @@ class BubbleTile : TileService() {
     override fun onStartListening() = refresh()
 
     override fun onClick() {
-        // the tile never asks for the notification permission itself: "already asked" keeps it enabling directly
+        // the tile never asks for the notification permission itself: when never asked it opens the app, which does
         val action = decideToggle(
             enabled = BubbleService.enabled,
             canDrawOverlays = Settings.canDrawOverlays(this),
             sdk = Build.VERSION.SDK_INT,
-            notificationGranted = false,
-            notificationAsked = true,
+            notificationGranted = Build.VERSION.SDK_INT >= 33 &&
+                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED,
+            notificationAsked = NotificationAsk.wasAsked(this),
         )
         when (action) {
             ToggleAction.Disable -> BubbleService.disable(this)
             ToggleAction.Enable -> BubbleService.enable(this)
-            // no overlay permission: MainActivity leads to the "Sobrepor a outros apps" screen
+            // no overlay permission, or notification never asked: MainActivity handles both
             ToggleAction.AskOverlay, ToggleAction.EnableViaApp -> { openApp(); return }
         }
         // with the panel open the tile does not get onStartListening again: show the requested state now
