@@ -16,15 +16,22 @@ class BubbleTile : TileService() {
     override fun onStartListening() = refresh()
 
     override fun onClick() {
-        val enable = !BubbleService.enabled
-        when {
-            !enable -> BubbleService.disable(this)
-            Settings.canDrawOverlays(this) -> BubbleService.enable(this)
-            // no permission: MainActivity leads to the "Sobrepor a outros apps" screen
-            else -> { openApp(); return }
+        // the tile never asks for the notification permission itself: "already asked" keeps it enabling directly
+        val action = decideToggle(
+            enabled = BubbleService.enabled,
+            canDrawOverlays = Settings.canDrawOverlays(this),
+            sdk = Build.VERSION.SDK_INT,
+            notificationGranted = false,
+            notificationAsked = true,
+        )
+        when (action) {
+            ToggleAction.Disable -> BubbleService.disable(this)
+            ToggleAction.Enable -> BubbleService.enable(this)
+            // no overlay permission: MainActivity leads to the "Sobrepor a outros apps" screen
+            ToggleAction.AskOverlay, ToggleAction.EnableViaApp -> { openApp(); return }
         }
         // with the panel open the tile does not get onStartListening again: show the requested state now
-        show(enable)
+        show(action == ToggleAction.Enable)
     }
 
     private fun refresh() = show(BubbleService.enabled)
